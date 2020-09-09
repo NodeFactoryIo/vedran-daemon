@@ -16,6 +16,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Install build essentials
+        shell: bash
+        run: apt-get update && apt-get -y install build-essential
+
+      - name: Build
+        shell: bash
+        run: make build
+
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v2
+        with:
+          version: v1.29
+
+      - name: Lint
+        uses: reviewdog/action-golangci-lint@v1
+
       - name: Run tests
         shell: bash
-        run: go test ./...
+        run: make test
