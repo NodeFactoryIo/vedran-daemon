@@ -21,7 +21,10 @@ lint:
 clean:
 	rm vedran-daemon 2> /dev/null || exit 0
 
-build: go run build
+build:
+	go build
 
-install: build
+install:
+	make clean
+	make build
 	cp vedran-daemon /usr/local/bin
