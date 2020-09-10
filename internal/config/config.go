@@ -39,6 +39,7 @@ func getMainConfigName() string {
 	if env := os.Getenv("ENV"); env != "" {
 		configFileName = configFileName + "-" + env
 	}
+
 	return configFileName
 }
 
