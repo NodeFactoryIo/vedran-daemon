@@ -1,10 +1,11 @@
 package config
 
 import (
-	"github.com/magiconair/properties/assert"
-	"github.com/spf13/viper"
 	"os"
 	"testing"
+
+	"github.com/magiconair/properties/assert"
+	"github.com/spf13/viper"
 )
 
 func TestInitMainConfig_getMainConfigName(t *testing.T) {
@@ -19,9 +20,6 @@ func TestInitMainConfig_getMainConfigName(t *testing.T) {
 
 func TestInitMainConfig_testDefaultValues(t *testing.T) {
 	InitMainConfig()
-	assert.Equal(t, viper.GetInt("stats.interval"), 3600)
-	assert.Equal(t, viper.GetInt("stats.blocks.interval"), 900)
-	assert.Equal(t, viper.GetInt("stats.uptime.interval"), 3600)
-	assert.Equal(t, viper.GetInt("stats.balance.interval"), 900)
+	assert.Equal(t, viper.GetInt("stats.interval"), 30)
 	assert.Equal(t, viper.GetString("log.level"), "error")
 }

@@ -29,7 +29,7 @@ func InitMainConfig() {
 }
 
 func setDefaultValuesForMainConfig() {
-	viper.SetDefault("stats.interval", 3600)
+	viper.SetDefault("stats.interval", 30)
 	viper.SetDefault("log.level", "error")
 }
 
