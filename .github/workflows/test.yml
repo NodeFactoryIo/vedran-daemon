@@ -29,9 +29,6 @@ jobs:
         with:
           version: v1.29
 
-      - name: Lint
-        uses: reviewdog/action-golangci-lint@v1
-
       - name: Run tests
         shell: bash
         run: make test
