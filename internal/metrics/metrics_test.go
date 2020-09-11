@@ -67,7 +67,7 @@ func TestGetNodeMetrics(t *testing.T) {
 			wantErr: true,
 			handleFunc: func(w http.ResponseWriter, r *http.Request) {
 				assert.Equal(t, http.MethodGet, r.Method)
-				io.WriteString(w, `invalid`)
+				_, _ = io.WriteString(w, `invalid`)
 			}},
 		{
 			name: "Returns metrics if prometheus response valid",
@@ -81,7 +81,7 @@ func TestGetNodeMetrics(t *testing.T) {
 			wantErr: false,
 			handleFunc: func(w http.ResponseWriter, r *http.Request) {
 				assert.Equal(t, http.MethodGet, r.Method)
-				io.WriteString(
+				_, _ = io.WriteString(
 					w,
 					`
 					# HELP polkadot_sync_peers Number of peers we sync with
