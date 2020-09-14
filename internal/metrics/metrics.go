@@ -1,6 +1,7 @@
 package metrics
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/go-errors/errors"
@@ -22,8 +23,10 @@ const (
 // GetNodeMetrics retrieves polkadot metrics from prometheus server
 func GetNodeMetrics(baseURL string) (*Metrics, error) {
 	resp, err := http.Get(baseURL + metricsEndpoint)
-	if err != nil || resp.StatusCode != http.StatusOK {
-		return nil, errors.New("Metrics endpoint returned error")
+	if err != nil {
+		return nil, errors.New(fmt.Sprintf("Metrics endpoint returned error: %v", err))
+	} else if resp.StatusCode != http.StatusOK {
+		return nil, errors.New(fmt.Sprintf("Metrics endpoint returned invalid status code: %d", resp.StatusCode))
 	}
 
 	defer resp.Body.Close()
