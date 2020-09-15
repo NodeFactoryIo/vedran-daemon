@@ -29,13 +29,10 @@ func (ps *pingService) Send() (*http.Response, error) {
 	body := &pingRequest{
 		timestamp: time.Now().Unix(),
 	}
-	req, err := ps.client.NewRequest(http.MethodPost, pingEndpoint, body)
-	if err != nil {
-		return nil, err
-	}
 
 	log.Println("Sending ping to load balancer")
-	resp, err := ps.client.Do(req, new(interface{}))
+	req, _ := ps.client.NewRequest(http.MethodPost, pingEndpoint, body)
+	resp, err := ps.client.Do(req, nil)
 
 	if err != nil {
 		sentry.CaptureException(err)
