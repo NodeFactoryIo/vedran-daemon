@@ -2,9 +2,6 @@
 
 > Daemon application for interacting with vedran load balancer.
 
-## Installation
-You can download already built binaries for your platform from `builds` folder or get `vedran-daemon` golang package and build it locally. Find detailed instructions below.
-
 ### Get `vedran-daemon` package
 1. Install [Golang](https://golang.org/doc/install) **1.13 or greater**
 2. Run the command below
@@ -34,11 +31,36 @@ Use "vedran-daemon [command] --help" for more information about a command.
 ```
 
 ## Development
+
+
+### Clone
+
+```bash
+git clone git@github.com:NodeFactoryIo/vedran-daemon.git
+```
+
+### Lint
+[Golangci-lint](https://golangci-lint.run/usage/install/#local-installation) is expected to be installed.
+
+```bash
+make lint
+```
+
+### Build
+
+```bash
+make build
+```
+
+### Test
+
+```bash
+make test
+```
+
 Run daemon app with `go run main.go [command]`.
 
 More about different _commands_ can be found in [Usage](#Usage).
-
-Expected name of the configuration file depends on `ENV` variable. For example, if you run a daemon app with `ENV=test go run main.go start`, expected config file name is `config-test.yaml`
 
 ## License
 
