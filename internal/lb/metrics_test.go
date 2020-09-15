@@ -2,6 +2,7 @@ package lb
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -9,7 +10,9 @@ import (
 	"testing"
 
 	"github.com/NodeFactoryIo/vedran-daemon/internal/metrics"
+	mocks "github.com/NodeFactoryIo/vedran-daemon/mocks/metrics"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 )
 
 func Test_metricsService_Send(t *testing.T) {
@@ -20,28 +23,40 @@ func Test_metricsService_Send(t *testing.T) {
 	bestBlockHeight := float64(432933)
 	finalizedBlockHeight := float64(432640)
 	readyTransactionCount := float64(0)
+	expectedMetrics := metrics.Metrics{
+		PeerCount:             &peerCount,
+		BestBlockHeight:       &bestBlockHeight,
+		FinalizedBlockHeight:  &finalizedBlockHeight,
+		ReadyTransactionCount: &readyTransactionCount}
 
-	type args struct {
-		metricsBaseURL string
-	}
 	tests := []struct {
-		name         string
-		args         args
-		wantErr      bool
-		lbHandleFunc handleFnMock
-		want         int
+		name                    string
+		wantErr                 bool
+		lbHandleFunc            handleFnMock
+		want                    int
+		fetchMetricsMockMetrics *metrics.Metrics
+		fetchMetricsMockError   error
 	}{
 		{
-			name:    "Returns error if sending metrics fails",
-			args:    args{""},
+			name:    "Returns error if fetching metrics fails",
 			wantErr: true,
 			want:    0,
 			lbHandleFunc: func(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, "Not Found", 404)
-			}},
+			},
+			fetchMetricsMockError:   fmt.Errorf("Failed fetching metrics"),
+			fetchMetricsMockMetrics: nil},
+		{
+			name:    "Returns error if sending metrics fails",
+			wantErr: true,
+			want:    0,
+			lbHandleFunc: func(w http.ResponseWriter, r *http.Request) {
+				http.Error(w, "Not Found", 404)
+			},
+			fetchMetricsMockError:   nil,
+			fetchMetricsMockMetrics: &expectedMetrics},
 		{
 			name:    "Returns resp if sending metrics succedes",
-			args:    args{""},
 			wantErr: false,
 			want:    200,
 			lbHandleFunc: func(w http.ResponseWriter, r *http.Request) {
@@ -59,7 +74,9 @@ func Test_metricsService_Send(t *testing.T) {
 					ReadyTransactionCount: &readyTransactionCount})
 
 				_, _ = io.WriteString(w, `{"status": "ok"}`)
-			}},
+			},
+			fetchMetricsMockError:   nil,
+			fetchMetricsMockMetrics: &expectedMetrics},
 	}
 	for _, tt := range tests {
 		setup()
@@ -69,13 +86,12 @@ func Test_metricsService_Send(t *testing.T) {
 			mockURL, _ := url.Parse(server.URL)
 			client := NewClient(mockURL)
 			ms := &metricsService{client: client}
+			fetchMetricsMock := &mocks.FetchMetrics{}
+			fetchMetricsMock.On("GetNodeMetrics", mock.Anything).Return(
+				tt.fetchMetricsMockMetrics,
+				tt.fetchMetricsMockError)
 
-			got, err := ms.Send(
-				&metrics.Metrics{
-					PeerCount:             &peerCount,
-					BestBlockHeight:       &bestBlockHeight,
-					FinalizedBlockHeight:  &finalizedBlockHeight,
-					ReadyTransactionCount: &readyTransactionCount})
+			got, err := ms.Send(fetchMetricsMock)
 
 			if (err != nil) != tt.wantErr {
 				t.Errorf("metricsService.Send() error = %v, wantErr %v", err, tt.wantErr)

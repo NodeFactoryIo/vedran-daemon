@@ -10,7 +10,7 @@ import (
 
 // MetricsService is used for sending node metrics to load balancer
 type MetricsService interface {
-	Send(metrics *metrics.Metrics) (*http.Response, error)
+	Send(fm metrics.FetchMetrics) (*http.Response, error)
 }
 
 type metricsService struct {
@@ -21,7 +21,12 @@ const (
 	metricsEndpoint = "/api/v1/nodes/metrics"
 )
 
-func (ms *metricsService) Send(metrics *metrics.Metrics) (*http.Response, error) {
+func (ms *metricsService) Send(fm metrics.FetchMetrics) (*http.Response, error) {
+	metrics, err := fm.GetNodeMetrics()
+	if err != nil {
+		return nil, err
+	}
+
 	log.Println("Sending metrics to load balancer")
 	req, _ := ms.client.NewRequest(http.MethodPut, metricsEndpoint, metrics)
 	resp, err := ms.client.Do(req, nil)

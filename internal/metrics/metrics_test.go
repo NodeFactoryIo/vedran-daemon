@@ -111,7 +111,8 @@ func TestGetNodeMetrics(t *testing.T) {
 			}
 			mux.HandleFunc("/metrics", tt.handleFunc)
 
-			got, err := GetNodeMetrics(tt.args.baseURL)
+			fms := &FetchMetricsService{tt.args.baseURL}
+			got, err := fms.GetNodeMetrics()
 
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetNodeMetrics() error = %v, wantErr %v", err, tt.wantErr)
