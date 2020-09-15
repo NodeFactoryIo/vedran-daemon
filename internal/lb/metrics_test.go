@@ -1,7 +1,9 @@
 package lb
 
 import (
+	"encoding/json"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"testing"
@@ -44,6 +46,18 @@ func Test_metricsService_Send(t *testing.T) {
 			want:    200,
 			lbHandleFunc: func(w http.ResponseWriter, r *http.Request) {
 				assert.Equal(t, http.MethodPut, r.Method)
+
+				var expectedMetrics metrics.Metrics
+				defer r.Body.Close()
+				body, _ := ioutil.ReadAll((r.Body))
+				_ = json.Unmarshal(body, &expectedMetrics)
+
+				assert.Equal(t, expectedMetrics, metrics.Metrics{
+					PeerCount:             &peerCount,
+					BestBlockHeight:       &bestBlockHeight,
+					FinalizedBlockHeight:  &finalizedBlockHeight,
+					ReadyTransactionCount: &readyTransactionCount})
+
 				_, _ = io.WriteString(w, `{"status": "ok"}`)
 			}},
 	}

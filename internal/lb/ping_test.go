@@ -1,7 +1,9 @@
 package lb
 
 import (
+	"encoding/json"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"testing"
@@ -32,6 +34,15 @@ func Test_pingService_Send(t *testing.T) {
 			want:    200,
 			lbHandleFunc: func(w http.ResponseWriter, r *http.Request) {
 				assert.Equal(t, http.MethodPost, r.Method)
+
+				var pingRequest pingRequest
+				defer r.Body.Close()
+				body, _ := ioutil.ReadAll((r.Body))
+				_ = json.Unmarshal(body, &pingRequest)
+
+				assert.NotNil(t, pingRequest.Timestamp)
+				assert.Greater(t, pingRequest.Timestamp, int64(1000))
+
 				_, _ = io.WriteString(w, `{"status": "ok"}`)
 			}},
 	}

@@ -18,7 +18,7 @@ type pingService struct {
 }
 
 type pingRequest struct {
-	timestamp int64
+	Timestamp int64 `json:"timestamp"`
 }
 
 const (
@@ -27,7 +27,7 @@ const (
 
 func (ps *pingService) Send() (*http.Response, error) {
 	body := &pingRequest{
-		timestamp: time.Now().Unix(),
+		Timestamp: time.Now().Unix(),
 	}
 
 	log.Println("Sending ping to load balancer")
