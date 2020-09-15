@@ -11,7 +11,7 @@ import (
 
 // MetricsService is used for sending node metrics to load balancer
 type MetricsService interface {
-	Send(metricsBaseURL string) (*http.Response, error)
+	Send(metrics *metrics.Metrics) (*http.Response, error)
 }
 
 type metricsService struct {
@@ -26,19 +26,10 @@ const (
 	metricsEndpoint = "/api/v1/nodes/metrics"
 )
 
-func (ms *metricsService) Send(metricsBaseURL string) (*http.Response, error) {
-	metrics, err := metrics.GetNodeMetrics(metricsBaseURL)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := ms.client.NewRequest(http.MethodPut, metricsEndpoint, metrics)
-	if err != nil {
-		return nil, err
-	}
-
+func (ms *metricsService) Send(metrics *metrics.Metrics) (*http.Response, error) {
 	log.Println("Sending metrics to load balancer")
-	resp, err := ms.client.Do(req, new(interface{}))
+	req, _ := ms.client.NewRequest(http.MethodPut, metricsEndpoint, metrics)
+	resp, err := ms.client.Do(req, nil)
 
 	if err != nil {
 		sentry.CaptureException(err)
