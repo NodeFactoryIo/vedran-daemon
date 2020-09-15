@@ -9,10 +9,10 @@ import (
 
 // Metrics required to be sent to load balancer
 type Metrics struct {
-	PeerCount             *float64
-	BestBlockHeight       *float64
-	FinalizedBlockHeight  *float64
-	ReadyTransactionCount *float64
+	PeerCount             *float64 `json:"peer_count"`
+	BestBlockHeight       *float64 `json:"best_block_height"`
+	FinalizedBlockHeight  *float64 `json:"finalized_block_height"`
+	ReadyTransactionCount *float64 `json:"read_transaction_count"`
 }
 
 const (

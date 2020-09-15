@@ -3,7 +3,6 @@ package lb
 import (
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/NodeFactoryIo/vedran-daemon/internal/metrics"
 	"github.com/getsentry/sentry-go"
@@ -16,10 +15,6 @@ type MetricsService interface {
 
 type metricsService struct {
 	client *Client
-}
-
-type metricsRequest struct {
-	timestamp time.Time
 }
 
 const (
