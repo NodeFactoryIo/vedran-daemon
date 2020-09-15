@@ -85,7 +85,7 @@ func (c *Client) NewRequest(method string, urlStr string, body interface{}) (*ht
 	req.Header.Add("Content-Type", mediaType)
 	req.Header.Add("Accept", mediaType)
 	if c.Token != "" {
-		req.Header.Add("X-Auth-Header", fmt.Sprintf("%s", c.Token))
+		req.Header.Add("X-Auth-Header", c.Token)
 	}
 	return req, nil
 }

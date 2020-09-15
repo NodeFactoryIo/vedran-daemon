@@ -23,9 +23,9 @@ const (
 func GetNodeMetrics(baseURL string) (*Metrics, error) {
 	resp, err := http.Get(baseURL + metricsEndpoint)
 	if err != nil {
-		return nil, fmt.Errorf("Metrics endpoint returned error: %v", err))
+		return nil, fmt.Errorf("Metrics endpoint returned error: %v", err)
 	} else if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("Metrics endpoint returned invalid status code: %d", resp.StatusCode))
+		return nil, fmt.Errorf("Metrics endpoint returned invalid status code: %d", resp.StatusCode)
 	}
 
 	defer resp.Body.Close()
