@@ -18,6 +18,6 @@ func Start(client *lb.Client, telemetry telemetry.TelemetryInterface, id string,
 	log.Printf("Registered to load balancer %s", client.BaseURL.String())
 
 	scheduler := gocron.NewScheduler(time.UTC)
-	err = telemetry.StartSendingTelemetry(scheduler, client, nodeMetrics)
-	return err
+	telemetry.StartSendingTelemetry(scheduler, client, nodeMetrics)
+	return nil
 }

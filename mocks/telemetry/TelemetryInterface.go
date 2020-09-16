@@ -15,15 +15,6 @@ type TelemetryInterface struct {
 }
 
 // StartSendingTelemetry provides a mock function with given fields: _a0, client, nodeMetrics
-func (_m *TelemetryInterface) StartSendingTelemetry(_a0 scheduler.Scheduler, client *lb.Client, nodeMetrics string) error {
-	ret := _m.Called(_a0, client, nodeMetrics)
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(scheduler.Scheduler, *lb.Client, string) error); ok {
-		r0 = rf(_a0, client, nodeMetrics)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
+func (_m *TelemetryInterface) StartSendingTelemetry(_a0 scheduler.Scheduler, client *lb.Client, nodeMetrics string) {
+	_m.Called(_a0, client, nodeMetrics)
 }

@@ -1,7 +1,6 @@
 package run
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -56,31 +55,21 @@ func TestStart(t *testing.T) {
 			wantErr: true,
 			handleFunc: func(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, "Not Found", 404)
-			},
-			startSendingTelemetryResult: nil},
-		{
-			name:    "Returns error if startSendingTelemetry fails",
-			args:    args{lbClient, "test-id", "localhost:9933", "localhost:9615", "0xtestpayoutaddress"},
-			wantErr: true,
-			handleFunc: func(w http.ResponseWriter, r *http.Request) {
-				_, _ = io.WriteString(w, `{"token": "test-token"}`)
-			},
-			startSendingTelemetryResult: fmt.Errorf("Errpr")},
+			}},
 		{
 			name:    "Returns nil if startSendingTelemetry succeeds",
 			args:    args{lbClient, "test-id", "localhost:9933", "localhost:9615", "0xtestpayoutaddress"},
 			wantErr: false,
 			handleFunc: func(w http.ResponseWriter, r *http.Request) {
 				_, _ = io.WriteString(w, `{"token": "test-token"}`)
-			},
-			startSendingTelemetryResult: nil},
+			}},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			setup()
 			telemetryMock := &mocks.TelemetryInterface{}
-			telemetryMock.On("StartSendingTelemetry", mock.Anything, mock.Anything, mock.Anything).Return(tt.startSendingTelemetryResult)
+			telemetryMock.On("StartSendingTelemetry", mock.Anything, mock.Anything, mock.Anything).Return()
 			url, _ := url.Parse(server.URL)
 			lbClient.BaseURL = url
 			mux.HandleFunc("/api/v1/nodes", tt.handleFunc)

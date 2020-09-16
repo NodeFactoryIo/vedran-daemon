@@ -21,15 +21,15 @@ func TestTelemetry_StartSendingTelemetry(t *testing.T) {
 	}
 
 	tests := []struct {
-		name    string
-		t       *Telemetry
-		args    args
-		wantErr bool
+		name               string
+		t                  *Telemetry
+		args               args
+		expectedNumOfCalls int
 	}{
 		{
-			name:    "Calls start blocking with jobs if job creation succeeds",
-			args:    args{client, "localhost:9615"},
-			wantErr: false},
+			name:               "Calls start blocking with ping and metrics jobs",
+			args:               args{client, "localhost:9615"},
+			expectedNumOfCalls: 1},
 	}
 
 	for _, tt := range tests {
@@ -40,12 +40,9 @@ func TestTelemetry_StartSendingTelemetry(t *testing.T) {
 			mockScheduler.On("StartBlocking").Return()
 			mockScheduler.On("Every", mock.Anything).Return(gocron.NewScheduler(time.UTC).Every(10))
 
-			err := telemetry.StartSendingTelemetry(mockScheduler, tt.args.client, tt.args.nodeMetrics)
+			telemetry.StartSendingTelemetry(mockScheduler, tt.args.client, tt.args.nodeMetrics)
 
-			if (err != nil) != tt.wantErr {
-				t.Errorf("Telemetry.StartSendingTelemetry() error = %v, wantErr %v", err, tt.wantErr)
-			}
-
+			mockScheduler.AssertNumberOfCalls(t, "StartBlocking", tt.expectedNumOfCalls)
 		})
 	}
 }
