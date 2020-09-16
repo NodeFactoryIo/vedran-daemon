@@ -33,4 +33,5 @@ func StartSendingTelemetry(client *lb.Client, nodeMetrics string) error {
 	log.Println("Started sending pings to load balancer")
 
 	scheduler.StartBlocking()
+	return nil
 }
