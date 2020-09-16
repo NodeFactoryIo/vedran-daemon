@@ -28,8 +28,8 @@ func (ms *metricsService) Send(fm metrics.FetchMetrics) (*http.Response, error) 
 	}
 
 	log.Println("Sending metrics to load balancer")
-	req, _ := ms.client.NewRequest(http.MethodPut, metricsEndpoint, metrics)
-	resp, err := ms.client.Do(req, nil)
+	req, _ := ms.client.newRequest(http.MethodPut, metricsEndpoint, metrics)
+	resp, err := ms.client.do(req, nil)
 
 	if err != nil {
 		log.Printf("Falied sending metrics to load balancer because of: %v", err)
