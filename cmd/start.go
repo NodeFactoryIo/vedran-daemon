@@ -25,14 +25,12 @@ var startCmd = &cobra.Command{
 }
 
 func init() {
-	startCmd.Flags().StringVar(&nodeRPC, "node-rpc", "", "Polkadot node rpc url (required)")
-	startCmd.Flags().StringVar(&nodeMetrics, "node-metrics", "", "Polkadot node metrics url (required)")
+	startCmd.Flags().StringVar(&nodeRPC, "node-rpc", "localhost:9933", "Polkadot node rpc url")
+	startCmd.Flags().StringVar(&nodeMetrics, "node-metrics", "localhost:9615", "Polkadot node metrics url")
 	startCmd.Flags().StringVar(&id, "id", "", "Vedran-daemon id string (required)")
 	startCmd.Flags().StringVar(&lbBaseURL, "lb", "", "Target load balancer url (required)")
 	startCmd.Flags().StringVar(&payoutAddress, "payout-address", "", "Payout address to which reward tokens will be sent (required)")
 
-	_ = startCmd.MarkFlagRequired("node-rpc")
-	_ = startCmd.MarkFlagRequired("node-metrics")
 	_ = startCmd.MarkFlagRequired("id")
 	_ = startCmd.MarkFlagRequired("lb")
 	_ = startCmd.MarkFlagRequired("payout-address")
