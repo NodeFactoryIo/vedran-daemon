@@ -32,6 +32,7 @@ func (ms *metricsService) Send(fm metrics.FetchMetrics) (*http.Response, error) 
 	resp, err := ms.client.Do(req, nil)
 
 	if err != nil {
+		log.Printf("Falied sending metrics to load balancer because of: %v", err)
 		sentry.CaptureException(err)
 		return nil, err
 	}

@@ -35,6 +35,7 @@ func (ps *pingService) Send() (*http.Response, error) {
 	resp, err := ps.client.Do(req, nil)
 
 	if err != nil {
+		log.Printf("Falied sending ping to load balancer because of: %v", err)
 		sentry.CaptureException(err)
 		return nil, err
 	}
