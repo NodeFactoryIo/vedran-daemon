@@ -2,13 +2,10 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"net/url"
-	"time"
 
 	"github.com/NodeFactoryIo/vedran-daemon/internal/lb"
-	"github.com/NodeFactoryIo/vedran-daemon/internal/metrics"
-	"github.com/go-co-op/gocron"
+	"github.com/NodeFactoryIo/vedran-daemon/internal/run"
 	"github.com/spf13/cobra"
 )
 
@@ -43,33 +40,16 @@ func init() {
 }
 
 func register(_ *cobra.Command, _ []string) error {
-	lbBaseURL, err := url.Parse(lbBaseURL)
+	lbURL, err := url.Parse(lbBaseURL)
 	if err != nil {
 		return fmt.Errorf("Failed parsing load balancer url")
 	}
 
-	client := lb.NewClient(lbBaseURL)
-	err = client.Register(id, nodeRPC, payoutAddress, "test-config-hash")
-	if err == nil {
-		return fmt.Errorf("Failed registering to load balancer on url %s because of: %v", lbBaseURL.String(), err)
-	}
-	log.Printf("Registered to load balancer %s", lbBaseURL)
-
-	scheduler := gocron.NewScheduler(time.UTC)
-
-	fms := &metrics.FetchMetricsService{BaseURL: nodeMetrics}
-	_, err = scheduler.Every(30).Seconds().Do(client.Metrics.Send, fms)
+	client := lb.NewClient(lbURL)
+	err = run.Run(client, id, nodeRPC, nodeMetrics, payoutAddress)
 	if err != nil {
-		return fmt.Errorf("Failed starting sending metrics becuase of: %v", err)
+		return fmt.Errorf("Failed registering to load balancer because of: %v", err)
 	}
-	log.Println("Started sending metrics to load balancer")
 
-	_, err = scheduler.Every(5).Seconds().Do(client.Ping.Send)
-	if err != nil {
-		return fmt.Errorf("Failed starting sending pings becuase of: %v", err)
-	}
-	log.Println("Started sending pings to load balancer")
-
-	scheduler.StartBlocking()
 	return nil
 }
