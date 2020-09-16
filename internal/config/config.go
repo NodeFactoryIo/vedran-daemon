@@ -22,6 +22,7 @@ func setupSentry() {
 	})
 	if err != nil {
 		fmt.Println("Sentry init failed")
+		return
 	}
 
 	// Flush buffered events before the program terminates.
