@@ -43,7 +43,7 @@ func start(cmd *cobra.Command, _ []string) error {
 	}
 
 	client := lb.NewClient(lbURL)
-	err = run.Run(client, id, nodeRPC, nodeMetrics, payoutAddress)
+	err = run.Start(client, id, nodeRPC, nodeMetrics, payoutAddress)
 
 	if err != nil {
 		return fmt.Errorf("Failed registering to load balancer because of: %v", err)
