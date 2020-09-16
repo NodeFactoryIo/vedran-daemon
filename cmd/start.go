@@ -7,6 +7,7 @@ import (
 
 	"github.com/NodeFactoryIo/vedran-daemon/internal/lb"
 	"github.com/NodeFactoryIo/vedran-daemon/internal/run"
+	"github.com/NodeFactoryIo/vedran-daemon/internal/telemetry"
 	"github.com/spf13/cobra"
 )
 
@@ -43,7 +44,8 @@ func start(cmd *cobra.Command, _ []string) error {
 	}
 
 	client := lb.NewClient(lbURL)
-	err = run.Start(client, id, nodeRPC, nodeMetrics, payoutAddress)
+	telemetry := &telemetry.Telemetry{}
+	err = run.Start(client, telemetry, id, nodeRPC, nodeMetrics, payoutAddress)
 
 	if err != nil {
 		return fmt.Errorf("Failed registering to load balancer because of: %v", err)
