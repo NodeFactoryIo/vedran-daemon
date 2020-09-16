@@ -107,7 +107,7 @@ func TestClient_Register(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			var mockURL *url.URL
 			if tt.fields.BaseURL == "valid" {
-				mockURL, _ = url.Parse(server.URL)
+				mockURL, _ = url.Parse(server.URL + "/")
 			} else {
 				mockURL, _ = url.Parse("http://invalid:3000")
 			}
@@ -134,7 +134,7 @@ func TestClient_Register(t *testing.T) {
 	}
 }
 
-func TestClient_NewRequest(t *testing.T) {
+func TestClient_newRequest(t *testing.T) {
 	baseURL, _ := url.Parse("http://url.com")
 	expectedURL, _ := url.Parse("http://url.com" + "/url")
 	expectedRequest, _ := http.NewRequest("GET", expectedURL.String(), new(bytes.Buffer))
@@ -201,22 +201,22 @@ func TestClient_NewRequest(t *testing.T) {
 				Token:   tt.fields.Token,
 			}
 
-			got, err := c.NewRequest(tt.args.method, tt.args.urlStr, tt.args.body)
+			got, err := c.newRequest(tt.args.method, tt.args.urlStr, tt.args.body)
 
 			if (err != nil) != tt.wantErr {
-				t.Errorf("Client.NewRequest() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("Client.newRequest() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 
 			if got != nil {
 				if !reflect.DeepEqual(got.URL, tt.want.URL) && !reflect.DeepEqual(got.Method, tt.want.Method) {
-					t.Errorf("Client.NewRequest() = %v, want %v", got, tt.want)
+					t.Errorf("Client.newRequest() = %v, want %v", got, tt.want)
 				}
 			}
 
 			if c.Token != "" {
 				if c.Token != got.Header.Get("X-Auth-Header") {
-					t.Errorf("Client.NewRequest() token = %s, want %s", got.Header.Get("X-Auth-Header"), c.Token)
+					t.Errorf("Client.newRequest() token = %s, want %s", got.Header.Get("X-Auth-Header"), c.Token)
 					return
 				}
 			}
@@ -225,7 +225,7 @@ func TestClient_NewRequest(t *testing.T) {
 	}
 }
 
-func TestClient_Do(t *testing.T) {
+func TestClient_do(t *testing.T) {
 	setup()
 	defer teardown()
 
@@ -306,19 +306,19 @@ func TestClient_Do(t *testing.T) {
 				BaseURL: mockURL,
 				Token:   tt.fields.Token,
 			}
-			req, _ := c.NewRequest(http.MethodGet, tt.args.url, tt.args.v)
+			req, _ := c.newRequest(http.MethodGet, tt.args.url, tt.args.v)
 			mux.HandleFunc("/", tt.handleFunc)
 
-			got, err := c.Do(req, tt.args.v)
+			got, err := c.do(req, tt.args.v)
 
 			if (err != nil) != tt.wantErr {
-				t.Errorf("Client.Do() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("Client.do() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 
 			if got != nil {
 				if !reflect.DeepEqual(testBody, tt.want) {
-					t.Errorf("Client.Do() = %v, want %v", testBody, tt.want)
+					t.Errorf("Client.do() = %v, want %v", testBody, tt.want)
 				}
 			}
 		})

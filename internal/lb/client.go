@@ -50,9 +50,9 @@ func (c *Client) Register(id string, nodeURL string, payoutAddress string, confi
 		PayoutAddress: payoutAddress,
 		ConfigHash:    configHash,
 	}
-	req, _ := c.NewRequest(http.MethodPost, registerEndpoint, body)
+	req, _ := c.newRequest(http.MethodPost, registerEndpoint, body)
 	tokenResponse := new(TokenResponse)
-	_, err := c.Do(req, tokenResponse)
+	_, err := c.do(req, tokenResponse)
 
 	if tokenResponse.Token != "" {
 		c.Token = tokenResponse.Token
@@ -61,10 +61,10 @@ func (c *Client) Register(id string, nodeURL string, payoutAddress string, confi
 	return err
 }
 
-// NewRequest creates an API request. A relative URL can be provided in urlStr, which will be resolved to the
+// newRequest creates an API request. A relative URL should be provided in urlStr, which will be resolved to the
 // BaseURL of the Client. If Client contains token X-Auth-Header will be added to request.
-func (c *Client) NewRequest(method string, urlStr string, body interface{}) (*http.Request, error) {
-	u, err := c.BaseURL.Parse(c.BaseURL.Path + urlStr)
+func (c *Client) newRequest(method string, urlStr string, body interface{}) (*http.Request, error) {
+	u, err := c.BaseURL.Parse(urlStr)
 	if err != nil {
 		return nil, err
 	}
@@ -90,9 +90,9 @@ func (c *Client) NewRequest(method string, urlStr string, body interface{}) (*ht
 	return req, nil
 }
 
-// Do sends an API request and returns the API response. The API response is JSON decoded and stored in the value
+// do sends an API request and returns the API response. The API response is JSON decoded and stored in the value
 // pointed to by v, or returned as an error if an API error has occurred
-func (c *Client) Do(req *http.Request, v interface{}) (*http.Response, error) {
+func (c *Client) do(req *http.Request, v interface{}) (*http.Response, error) {
 	resp, err := c.client.Do(req)
 	if err != nil {
 		return nil, err
