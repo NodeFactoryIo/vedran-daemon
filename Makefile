@@ -2,7 +2,7 @@ COMMIT?=${BUILDCOMMIT}
 VERSION?=${BUILDTAG}
 
 # enable cgo because it's required by OSX keychain library
-CGO_ENABLED=1
+CGO_ENABLED=0
 
 # enable go modules
 GO111MODULE=on
@@ -28,3 +28,14 @@ install:
 	make clean
 	make build
 	cp vedran-daemon /usr/local/bin
+
+PLATFORMS := linux/amd64 linux/arm windows/amd64 darwin/amd64
+
+temp = $(subst /, ,$@)
+os = $(word 1, $(temp))
+arch = $(word 2, $(temp))
+
+buildAll: $(PLATFORMS)
+
+$(PLATFORMS):
+	GOOS=$(os) GOARCH=$(arch) go build -o 'vedran-daemon-$(os)-$(arch)'
