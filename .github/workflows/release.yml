@@ -21,6 +21,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Build All
+        shell: bash
+        env:
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+        run: |
+          SENTRY_DSN=$SENTRY_DSN make buildAll
+
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -31,13 +38,6 @@ jobs:
           release_name: Release ${{ github.ref }}
           draft: false
           prerelease: false
-
-      - name: Build All
-        shell: bash
-        env:
-          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-        run: |
-          SENTRY_DSN=$SENTRY_DSN make buildAll
 
       - name: Upload Linux amd64
         id: vedran-daemon-linux-amd64
@@ -82,3 +82,14 @@ jobs:
           asset_path: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/vedran-daemon-darwin-amd64
           asset_name: vedran-daemon-macos
           asset_content_type: application/x-binary
+
+      #in case of failure
+      - name: Rollback on failure
+        if: failure()
+        uses: author/action-rollback@9ec72a6af74774e00343c6de3e946b0901c23013
+        with:
+          id: ${{ steps.create_release.outputs.id }}
+          tag: ${{ needs.tag.outputs.tag }}
+          delete_orphan_tag: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
