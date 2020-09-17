@@ -54,22 +54,6 @@ func (_m *Scheduler) Every(interval uint64) *gocron.Scheduler {
 	return r0
 }
 
-// Seconds provides a mock function with given fields:
-func (_m *Scheduler) Seconds() *gocron.Scheduler {
-	ret := _m.Called()
-
-	var r0 *gocron.Scheduler
-	if rf, ok := ret.Get(0).(func() *gocron.Scheduler); ok {
-		r0 = rf()
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*gocron.Scheduler)
-		}
-	}
-
-	return r0
-}
-
 // StartBlocking provides a mock function with given fields:
 func (_m *Scheduler) StartBlocking() {
 	_m.Called()
