@@ -4,7 +4,7 @@ name: Tests MacOS
 jobs:
   build:
     name: Run tests
-    runs-on: maxos-latest
+    runs-on: macos-latest
     env:
       GO111MODULE: "on"
     steps:
