@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/NodeFactoryIo/vedran-daemon/internal/lb"
-	"github.com/NodeFactoryIo/vedran-daemon/internal/metrics"
+	"github.com/NodeFactoryIo/vedran-daemon/internal/node"
 	"github.com/NodeFactoryIo/vedran-daemon/internal/run"
 	"github.com/NodeFactoryIo/vedran-daemon/internal/telemetry"
 	"github.com/spf13/cobra"
@@ -20,6 +20,7 @@ var (
 	payoutAddress  string
 	lbURL          *url.URL
 	metricsURL     *url.URL
+	rpcURL         *url.URL
 )
 
 var startCmd = &cobra.Command{
@@ -36,6 +37,11 @@ var startCmd = &cobra.Command{
 		metricsURL, err = url.Parse(nodeMetricsURL)
 		if err != nil {
 			return fmt.Errorf("Failed parsing metrics url: %v", err)
+		}
+
+		rpcURL, err = url.Parse(nodeRPCURL)
+		if err != nil {
+			return fmt.Errorf("Failed parsing rpc url: %v", err)
 		}
 
 		return nil
@@ -56,10 +62,10 @@ func init() {
 
 func start(cmd *cobra.Command, _ []string) error {
 	lbClient := lb.NewClient(lbURL)
-	metricsClient := metrics.NewClient(metricsURL)
+	nodeClient := node.NewClient(metricsURL, nodeRPCURL)
 	telemetry := &telemetry.Telemetry{}
 
-	err := run.Start(lbClient, metricsClient, telemetry, id, nodeRPCURL, payoutAddress)
+	err := run.Start(lbClient, nodeClient, telemetry, id, nodeRPCURL, payoutAddress)
 	if err != nil {
 		return fmt.Errorf("Failed starting vedran daemon because: %v", err)
 	}

@@ -4,9 +4,9 @@ package mocks
 
 import (
 	lb "github.com/NodeFactoryIo/vedran-daemon/internal/lb"
-	metrics "github.com/NodeFactoryIo/vedran-daemon/internal/metrics"
-
 	mock "github.com/stretchr/testify/mock"
+
+	node "github.com/NodeFactoryIo/vedran-daemon/internal/node"
 
 	scheduler "github.com/NodeFactoryIo/vedran-daemon/internal/scheduler"
 )
@@ -16,7 +16,7 @@ type TelemetryInterface struct {
 	mock.Mock
 }
 
-// StartSendingTelemetry provides a mock function with given fields: _a0, lbClient, metricsClient
-func (_m *TelemetryInterface) StartSendingTelemetry(_a0 scheduler.Scheduler, lbClient *lb.Client, metricsClient metrics.Client) {
-	_m.Called(_a0, lbClient, metricsClient)
+// StartSendingTelemetry provides a mock function with given fields: _a0, lbClient, nodeClient
+func (_m *TelemetryInterface) StartSendingTelemetry(_a0 scheduler.Scheduler, lbClient *lb.Client, nodeClient node.Client) {
+	_m.Called(_a0, lbClient, nodeClient)
 }
