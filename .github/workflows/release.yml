@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     branches:
-      - 'mpetrun5/release-pipeline'
+      - 'master'
 
 jobs:
   tag:
