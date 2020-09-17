@@ -18,12 +18,28 @@ var (
 	id             string
 	lbBaseURL      string
 	payoutAddress  string
+	lbURL          *url.URL
+	metricsURL     *url.URL
 )
 
 var startCmd = &cobra.Command{
 	Use:   "vedran-daemon",
 	Short: "Register vedran-daemon with load balancer and start sending telemetry",
 	RunE:  start,
+	Args: func(cms *cobra.Command, args []string) error {
+		var err error
+		lbURL, err = url.Parse(lbBaseURL)
+		if err != nil {
+			return fmt.Errorf("Failed parsing load balancer url")
+		}
+
+		metricsURL, err = url.Parse(nodeMetricsURL)
+		if err != nil {
+			return fmt.Errorf("Failed parsing load balancer url")
+		}
+
+		return nil
+	},
 }
 
 func init() {
@@ -39,21 +55,11 @@ func init() {
 }
 
 func start(cmd *cobra.Command, _ []string) error {
-	lbURL, err := url.Parse(lbBaseURL)
-	if err != nil {
-		return fmt.Errorf("Failed parsing load balancer url")
-	}
-
-	metricsURL, err := url.Parse(nodeMetricsURL)
-	if err != nil {
-		return fmt.Errorf("Failed parsing load balancer url")
-	}
-
 	lbClient := lb.NewClient(lbURL)
 	metricsClient := metrics.NewClient(metricsURL)
 	telemetry := &telemetry.Telemetry{}
-	err = run.Start(lbClient, metricsClient, telemetry, id, nodeRPCURL, payoutAddress)
 
+	err := run.Start(lbClient, metricsClient, telemetry, id, nodeRPCURL, payoutAddress)
 	if err != nil {
 		return fmt.Errorf("Failed starting vedran daemon because: %v", err)
 	}
