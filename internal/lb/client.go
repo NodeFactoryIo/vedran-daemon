@@ -32,12 +32,18 @@ type Client struct {
 	client  *http.Client
 	BaseURL *url.URL
 	Token   string
+
+	Ping    PingService
+	Metrics MetricsService
 }
 
 // NewClient creates vedran load balancer client instance
 func NewClient(baseURL *url.URL) *Client {
 	httpClient := http.DefaultClient
 	c := &Client{client: httpClient, BaseURL: baseURL}
+
+	c.Ping = &pingService{client: c}
+	c.Metrics = &metricsService{client: c}
 
 	return c
 }

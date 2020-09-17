@@ -28,7 +28,9 @@ func teardown() {
 
 func TestNewClient(t *testing.T) {
 	expectedURL, _ := url.Parse("http://url.com")
-	expectedClient := http.DefaultClient
+	expectedClient := &Client{client: http.DefaultClient, BaseURL: expectedURL}
+	expectedClient.Ping = &pingService{client: expectedClient}
+	expectedClient.Metrics = &metricsService{client: expectedClient}
 
 	type args struct {
 		baseURL *url.URL
@@ -42,7 +44,7 @@ func TestNewClient(t *testing.T) {
 		{
 			name: "Returns instance of client",
 			args: args{expectedURL},
-			want: &Client{BaseURL: expectedURL, client: expectedClient}},
+			want: expectedClient},
 	}
 
 	for _, tt := range tests {

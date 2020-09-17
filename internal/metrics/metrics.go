@@ -7,12 +7,21 @@ import (
 	"github.com/prometheus/common/expfmt"
 )
 
+// FetchMetrics is used to scrape metrics data from prometheus server
+type FetchMetrics interface {
+	GetNodeMetrics() (*Metrics, error)
+}
+
 // Metrics required to be sent to load balancer
 type Metrics struct {
-	PeerCount             *float64
-	BestBlockHeight       *float64
-	FinalizedBlockHeight  *float64
-	ReadyTransactionCount *float64
+	PeerCount             *float64 `json:"peer_count"`
+	BestBlockHeight       *float64 `json:"best_block_height"`
+	FinalizedBlockHeight  *float64 `json:"finalized_block_height"`
+	ReadyTransactionCount *float64 `json:"read_transaction_count"`
+}
+
+type FetchMetricsService struct {
+	BaseURL string
 }
 
 const (
@@ -20,8 +29,8 @@ const (
 )
 
 // GetNodeMetrics retrieves polkadot metrics from prometheus server
-func GetNodeMetrics(baseURL string) (*Metrics, error) {
-	resp, err := http.Get(baseURL + metricsEndpoint)
+func (fms *FetchMetricsService) GetNodeMetrics() (*Metrics, error) {
+	resp, err := http.Get(fms.BaseURL + metricsEndpoint)
 	if err != nil {
 		return nil, fmt.Errorf("Metrics endpoint returned error: %v", err)
 	} else if resp.StatusCode != http.StatusOK {
