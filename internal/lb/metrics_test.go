@@ -11,7 +11,6 @@ import (
 
 	"github.com/NodeFactoryIo/vedran-daemon/internal/node"
 	mocks "github.com/NodeFactoryIo/vedran-daemon/mocks/node"
-	"github.com/armon/go-metrics"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -64,7 +63,7 @@ func Test_metricsService_Send(t *testing.T) {
 			lbHandleFunc: func(w http.ResponseWriter, r *http.Request) {
 				assert.Equal(t, http.MethodPut, r.Method)
 
-				var expectedMetrics metrics.Metrics
+				var expectedMetrics node.Metrics
 				defer r.Body.Close()
 				body, _ := ioutil.ReadAll((r.Body))
 				_ = json.Unmarshal(body, &expectedMetrics)
