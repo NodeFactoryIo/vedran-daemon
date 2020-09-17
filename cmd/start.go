@@ -62,10 +62,10 @@ func init() {
 
 func start(cmd *cobra.Command, _ []string) error {
 	lbClient := lb.NewClient(lbURL)
-	nodeClient := node.NewClient(metricsURL, nodeRPCURL)
+	nodeClient := node.NewClient(metricsURL, rpcURL)
 	telemetry := &telemetry.Telemetry{}
 
-	err := run.Start(lbClient, nodeClient, telemetry, id, nodeRPCURL, payoutAddress)
+	err := run.Start(lbClient, nodeClient, telemetry, id, payoutAddress)
 	if err != nil {
 		return fmt.Errorf("Failed starting vedran daemon because: %v", err)
 	}

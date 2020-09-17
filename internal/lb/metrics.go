@@ -4,13 +4,13 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/NodeFactoryIo/vedran-daemon/internal/metrics"
+	"github.com/NodeFactoryIo/vedran-daemon/internal/node"
 	"github.com/getsentry/sentry-go"
 )
 
 // MetricsService is used for sending node metrics to load balancer
 type MetricsService interface {
-	Send(client metrics.Client) (*http.Response, error)
+	Send(client node.Client) (*http.Response, error)
 }
 
 type metricsService struct {
@@ -21,8 +21,8 @@ const (
 	metricsEndpoint = "/api/v1/nodes/metrics"
 )
 
-func (ms *metricsService) Send(client metrics.Client) (*http.Response, error) {
-	metrics, err := client.GetNodeMetrics()
+func (ms *metricsService) Send(client node.Client) (*http.Response, error) {
+	metrics, err := client.GetMetrics()
 	if err != nil {
 		return nil, err
 	}

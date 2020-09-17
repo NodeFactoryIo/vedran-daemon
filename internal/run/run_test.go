@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/NodeFactoryIo/vedran-daemon/internal/lb"
-	metricsMocks "github.com/NodeFactoryIo/vedran-daemon/mocks/metrics"
+	nodeMocks "github.com/NodeFactoryIo/vedran-daemon/mocks/node"
 	telemetryMocks "github.com/NodeFactoryIo/vedran-daemon/mocks/telemetry"
 	"github.com/stretchr/testify/mock"
 )
@@ -35,11 +35,11 @@ func TestStart(t *testing.T) {
 
 	lbURL, _ := url.Parse(server.URL)
 	lbClient := lb.NewClient(lbURL)
-	metricsClient := &metricsMocks.Client{}
+	nodeClient := &nodeMocks.Client{}
+
 	type args struct {
 		client        *lb.Client
 		id            string
-		nodeRPC       string
 		payoutAddress string
 	}
 
@@ -52,14 +52,14 @@ func TestStart(t *testing.T) {
 	}{
 		{
 			name:    "Returns error if lb register fails",
-			args:    args{lbClient, "test-id", "localhost:9933", "0xtestpayoutaddress"},
+			args:    args{lbClient, "test-id", "0xtestpayoutaddress"},
 			wantErr: true,
 			handleFunc: func(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, "Not Found", 404)
 			}},
 		{
 			name:    "Returns nil if startSendingTelemetry succeeds",
-			args:    args{lbClient, "test-id", "localhost:9933", "0xtestpayoutaddress"},
+			args:    args{lbClient, "test-id", "0xtestpayoutaddress"},
 			wantErr: false,
 			handleFunc: func(w http.ResponseWriter, r *http.Request) {
 				_, _ = io.WriteString(w, `{"token": "test-token"}`)
@@ -69,13 +69,15 @@ func TestStart(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			setup()
+
 			telemetryMock := &telemetryMocks.TelemetryInterface{}
 			telemetryMock.On("StartSendingTelemetry", mock.Anything, mock.Anything, mock.Anything).Return()
+			nodeClient.On("GetRPCURL").Return("http://localhost:9933")
 			url, _ := url.Parse(server.URL)
 			lbClient.BaseURL = url
 			mux.HandleFunc("/api/v1/nodes", tt.handleFunc)
 
-			err := Start(tt.args.client, metricsClient, telemetryMock, tt.args.id, tt.args.nodeRPC, tt.args.payoutAddress)
+			err := Start(tt.args.client, nodeClient, telemetryMock, tt.args.id, tt.args.payoutAddress)
 
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Start() error = %v, wantErr %v", err, tt.wantErr)
