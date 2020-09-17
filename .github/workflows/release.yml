@@ -21,7 +21,7 @@ jobs:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
           strategy: regex
           tag_prefix: "v"
-          root: version
+          root: .version
           regex_pattern: version=([0-9\.]{5}([-\+][\w\.0-9]+)?)
 
     outputs:
@@ -29,7 +29,7 @@ jobs:
       version: ${{ steps.tag.outputs.version }}
 
 
-  build:
+  publish:
     name: Publish
     needs: tag
     if: ${{ needs.tag.outputs.tag == ''}}
@@ -99,8 +99,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/vedran-daemon-windows-amd64
-          asset_name: vedran-daemon-windows
+          asset_path: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/vedran-daemon-windows-amd64.exe
+          asset_name: vedran-daemon-windows.exe
           asset_content_type: application/x-binary
 
       - name: Upload MacOS
@@ -111,7 +111,7 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/vedran-daemon-darwin-amd64
-          asset_name: vedran-daemon-macos
+          asset_name: Vedran-daemon-macos
           asset_content_type: application/x-binary
 
       #in case of failure
