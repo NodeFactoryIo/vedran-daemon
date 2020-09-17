@@ -30,12 +30,12 @@ var startCmd = &cobra.Command{
 		var err error
 		lbURL, err = url.Parse(lbBaseURL)
 		if err != nil {
-			return fmt.Errorf("Failed parsing load balancer url")
+			return fmt.Errorf("Failed parsing load balancer url: %v", err)
 		}
 
 		metricsURL, err = url.Parse(nodeMetricsURL)
 		if err != nil {
-			return fmt.Errorf("Failed parsing load balancer url")
+			return fmt.Errorf("Failed parsing metrics url: %v", err)
 		}
 
 		return nil
