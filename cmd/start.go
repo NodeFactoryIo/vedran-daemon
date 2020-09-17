@@ -6,17 +6,18 @@ import (
 	"os"
 
 	"github.com/NodeFactoryIo/vedran-daemon/internal/lb"
+	"github.com/NodeFactoryIo/vedran-daemon/internal/metrics"
 	"github.com/NodeFactoryIo/vedran-daemon/internal/run"
 	"github.com/NodeFactoryIo/vedran-daemon/internal/telemetry"
 	"github.com/spf13/cobra"
 )
 
 var (
-	nodeRPC       string
-	nodeMetrics   string
-	id            string
-	lbBaseURL     string
-	payoutAddress string
+	nodeRPCURL     string
+	nodeMetricsURL string
+	id             string
+	lbBaseURL      string
+	payoutAddress  string
 )
 
 var startCmd = &cobra.Command{
@@ -26,8 +27,8 @@ var startCmd = &cobra.Command{
 }
 
 func init() {
-	startCmd.Flags().StringVar(&nodeRPC, "node-rpc", "localhost:9933", "Polkadot node rpc url")
-	startCmd.Flags().StringVar(&nodeMetrics, "node-metrics", "localhost:9615", "Polkadot node metrics url")
+	startCmd.Flags().StringVar(&nodeRPCURL, "node-rpc", "localhost:9933", "Polkadot node rpc url")
+	startCmd.Flags().StringVar(&nodeMetricsURL, "node-metrics", "localhost:9615", "Polkadot node metrics url")
 	startCmd.Flags().StringVar(&id, "id", "", "Vedran-daemon id string (required)")
 	startCmd.Flags().StringVar(&lbBaseURL, "lb", "", "Target load balancer url (required)")
 	startCmd.Flags().StringVar(&payoutAddress, "payout-address", "", "Payout address to which reward tokens will be sent (required)")
@@ -43,12 +44,18 @@ func start(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("Failed parsing load balancer url")
 	}
 
-	client := lb.NewClient(lbURL)
+	metricsURL, err := url.Parse(nodeMetricsURL)
+	if err != nil {
+		return fmt.Errorf("Failed parsing load balancer url")
+	}
+
+	lbClient := lb.NewClient(lbURL)
+	metricsClient := metrics.NewClient(metricsURL)
 	telemetry := &telemetry.Telemetry{}
-	err = run.Start(client, telemetry, id, nodeRPC, nodeMetrics, payoutAddress)
+	err = run.Start(lbClient, metricsClient, telemetry, id, nodeRPCURL, payoutAddress)
 
 	if err != nil {
-		return fmt.Errorf("Failed registering to load balancer because of: %v", err)
+		return fmt.Errorf("Failed starting vedran daemon because: %v", err)
 	}
 
 	return nil

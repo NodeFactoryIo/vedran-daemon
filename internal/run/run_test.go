@@ -8,7 +8,8 @@ import (
 	"testing"
 
 	"github.com/NodeFactoryIo/vedran-daemon/internal/lb"
-	mocks "github.com/NodeFactoryIo/vedran-daemon/mocks/telemetry"
+	metricsMocks "github.com/NodeFactoryIo/vedran-daemon/mocks/metrics"
+	telemetryMocks "github.com/NodeFactoryIo/vedran-daemon/mocks/telemetry"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -34,11 +35,11 @@ func TestStart(t *testing.T) {
 
 	lbURL, _ := url.Parse(server.URL)
 	lbClient := lb.NewClient(lbURL)
+	metricsClient := &metricsMocks.Client{}
 	type args struct {
 		client        *lb.Client
 		id            string
 		nodeRPC       string
-		nodeMetrics   string
 		payoutAddress string
 	}
 
@@ -51,14 +52,14 @@ func TestStart(t *testing.T) {
 	}{
 		{
 			name:    "Returns error if lb register fails",
-			args:    args{lbClient, "test-id", "localhost:9933", "localhost:9615", "0xtestpayoutaddress"},
+			args:    args{lbClient, "test-id", "localhost:9933", "0xtestpayoutaddress"},
 			wantErr: true,
 			handleFunc: func(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, "Not Found", 404)
 			}},
 		{
 			name:    "Returns nil if startSendingTelemetry succeeds",
-			args:    args{lbClient, "test-id", "localhost:9933", "localhost:9615", "0xtestpayoutaddress"},
+			args:    args{lbClient, "test-id", "localhost:9933", "0xtestpayoutaddress"},
 			wantErr: false,
 			handleFunc: func(w http.ResponseWriter, r *http.Request) {
 				_, _ = io.WriteString(w, `{"token": "test-token"}`)
@@ -68,13 +69,13 @@ func TestStart(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			setup()
-			telemetryMock := &mocks.TelemetryInterface{}
+			telemetryMock := &telemetryMocks.TelemetryInterface{}
 			telemetryMock.On("StartSendingTelemetry", mock.Anything, mock.Anything, mock.Anything).Return()
 			url, _ := url.Parse(server.URL)
 			lbClient.BaseURL = url
 			mux.HandleFunc("/api/v1/nodes", tt.handleFunc)
 
-			err := Start(tt.args.client, telemetryMock, tt.args.id, tt.args.nodeRPC, tt.args.nodeMetrics, tt.args.payoutAddress)
+			err := Start(tt.args.client, metricsClient, telemetryMock, tt.args.id, tt.args.nodeRPC, tt.args.payoutAddress)
 
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Start() error = %v, wantErr %v", err, tt.wantErr)

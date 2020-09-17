@@ -14,18 +14,17 @@ const (
 )
 
 type TelemetryInterface interface {
-	StartSendingTelemetry(scheduler scheduler.Scheduler, client *lb.Client, nodeMetrics string)
+	StartSendingTelemetry(scheduler scheduler.Scheduler, lbClient *lb.Client, metricsClient metrics.Client)
 }
 
 type Telemetry struct{}
 
 // StartSendingTelemetry start sending ping and metrics to load balancer and blocks current thread
-func (t *Telemetry) StartSendingTelemetry(scheduler scheduler.Scheduler, client *lb.Client, nodeMetrics string) {
-	fms := &metrics.FetchMetricsService{BaseURL: nodeMetrics}
-	_, _ = scheduler.Every(metricsSendInterval).Seconds().Do(client.Metrics.Send, fms)
+func (t *Telemetry) StartSendingTelemetry(scheduler scheduler.Scheduler, lbClient *lb.Client, metricsClient metrics.Client) {
+	_, _ = scheduler.Every(metricsSendInterval).Seconds().Do(lbClient.Metrics.Send, metricsClient)
 	log.Println("Started sending metrics to load balancer")
 
-	_, _ = scheduler.Every(pingSendInterval).Seconds().Do(client.Ping.Send)
+	_, _ = scheduler.Every(pingSendInterval).Seconds().Do(lbClient.Ping.Send)
 	log.Println("Started sending pings to load balancer")
 
 	scheduler.StartBlocking()

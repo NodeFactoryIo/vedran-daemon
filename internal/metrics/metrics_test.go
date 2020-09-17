@@ -4,6 +4,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"reflect"
 	"testing"
 
@@ -104,15 +105,16 @@ func TestGetNodeMetrics(t *testing.T) {
 		defer teardown()
 
 		t.Run(tt.name, func(t *testing.T) {
+			var baseURL *url.URL
 			if tt.args.baseURL == "valid" {
-				tt.args.baseURL = server.URL
+				baseURL, _ = url.Parse(server.URL)
 			} else {
-				tt.args.baseURL = "http://invalid:3000"
+				baseURL, _ = url.Parse("http://invalid:3000")
 			}
 			mux.HandleFunc("/metrics", tt.handleFunc)
 
-			fms := &FetchMetricsService{tt.args.baseURL}
-			got, err := fms.GetNodeMetrics()
+			metricsClient := NewClient(baseURL)
+			got, err := metricsClient.GetNodeMetrics()
 
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetNodeMetrics() error = %v, wantErr %v", err, tt.wantErr)

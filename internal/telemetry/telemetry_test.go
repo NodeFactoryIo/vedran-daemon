@@ -6,18 +6,19 @@ import (
 	"time"
 
 	"github.com/NodeFactoryIo/vedran-daemon/internal/lb"
-	mocks "github.com/NodeFactoryIo/vedran-daemon/mocks/scheduler"
+	metricsMocks "github.com/NodeFactoryIo/vedran-daemon/mocks/metrics"
+	schedulerMocks "github.com/NodeFactoryIo/vedran-daemon/mocks/scheduler"
 	"github.com/go-co-op/gocron"
 	"github.com/stretchr/testify/mock"
 )
 
 func TestTelemetry_StartSendingTelemetry(t *testing.T) {
 	lbURL, _ := url.Parse("localhost:4000")
-	client := lb.NewClient(lbURL)
+	lbClient := lb.NewClient(lbURL)
+	metricsClient := &metricsMocks.Client{}
 
 	type args struct {
-		client      *lb.Client
-		nodeMetrics string
+		lbClient *lb.Client
 	}
 
 	tests := []struct {
@@ -28,19 +29,19 @@ func TestTelemetry_StartSendingTelemetry(t *testing.T) {
 	}{
 		{
 			name:               "Calls start blocking with ping and metrics jobs",
-			args:               args{client, "localhost:9615"},
+			args:               args{lbClient},
 			expectedNumOfCalls: 1},
 	}
 
 	for _, tt := range tests {
 
 		t.Run(tt.name, func(t *testing.T) {
-			mockScheduler := &mocks.Scheduler{}
+			mockScheduler := &schedulerMocks.Scheduler{}
 			telemetry := &Telemetry{}
 			mockScheduler.On("StartBlocking").Return()
 			mockScheduler.On("Every", mock.Anything).Return(gocron.NewScheduler(time.UTC).Every(10))
 
-			telemetry.StartSendingTelemetry(mockScheduler, tt.args.client, tt.args.nodeMetrics)
+			telemetry.StartSendingTelemetry(mockScheduler, tt.args.lbClient, metricsClient)
 
 			mockScheduler.AssertNumberOfCalls(t, "StartBlocking", tt.expectedNumOfCalls)
 		})

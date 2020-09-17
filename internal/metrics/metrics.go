@@ -3,12 +3,13 @@ package metrics
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/prometheus/common/expfmt"
 )
 
-// FetchMetrics is used to scrape metrics data from prometheus server
-type FetchMetrics interface {
+// Client is used to scrape metrics data from prometheus server
+type Client interface {
 	GetNodeMetrics() (*Metrics, error)
 }
 
@@ -20,8 +21,13 @@ type Metrics struct {
 	ReadyTransactionCount *float64 `json:"read_transaction_count"`
 }
 
-type FetchMetricsService struct {
-	BaseURL string
+// NewClient creates metrics client instance
+func NewClient(baseURL *url.URL) Client {
+	return &client{BaseURL: baseURL}
+}
+
+type client struct {
+	BaseURL *url.URL
 }
 
 const (
@@ -29,8 +35,9 @@ const (
 )
 
 // GetNodeMetrics retrieves polkadot metrics from prometheus server
-func (fms *FetchMetricsService) GetNodeMetrics() (*Metrics, error) {
-	resp, err := http.Get(fms.BaseURL + metricsEndpoint)
+func (client *client) GetNodeMetrics() (*Metrics, error) {
+	metricsURL, _ := client.BaseURL.Parse(metricsEndpoint)
+	resp, err := http.Get(metricsURL.String())
 	if err != nil {
 		return nil, fmt.Errorf("Metrics endpoint returned error: %v", err)
 	} else if resp.StatusCode != http.StatusOK {
