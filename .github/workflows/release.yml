@@ -1,0 +1,84 @@
+on:
+  push:
+    # Sequence of patterns matched against refs/tags
+    tags:
+      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+
+name: Release
+
+jobs:
+  build:
+    name: Build and release
+    runs-on: ubuntu-latest
+    env:
+      GO111MODULE: "on"
+    steps:
+      - name: Install Go
+        uses: actions/setup-go@v2-beta
+        with:
+          go-version: 1.14.x
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+      - name: Build All
+        shell: bash
+        env:
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+        run: |
+          SENTRY_DSN=$SENTRY_DSN make buildAll
+
+      - name: Upload Linux amd64
+        id: vedran-daemon-linux-amd64
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/vedran-daemon-linux-amd64
+          asset_name: vedran-daemon-linux-amd64
+          asset_content_type: application/x-binary
+
+      - name: Upload Linux Arm
+        id: vedran-daemon-linux-arm
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/vedran-daemon-linux-arm
+          asset_name: vedran-daemon-linux-arm
+          asset_content_type: application/x-binary
+
+      - name: Upload Windows
+        id: vedran-daemon-windows
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/vedran-daemon-windows-amd64
+          asset_name: vedran-daemon-windows
+          asset_content_type: application/x-binary
+
+      - name: Upload MacOS
+        id: vedran-daemon-macos
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/vedran-daemon-darwin-amd64
+          asset_name: vedran-daemon-macos
+          asset_content_type: application/x-binary
