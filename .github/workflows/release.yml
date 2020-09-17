@@ -1,14 +1,38 @@
-on:
-  push:
-    # Sequence of patterns matched against refs/tags
-    tags:
-      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
-
 name: Release
 
+on:
+  push:
+    branches:
+      - 'mpetrun5/release-pipeline'
+
 jobs:
+  tag:
+    name: Check and Tag
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Create tag
+        id: tag
+        uses: butlerlogic/action-autotag@1.1.1
+        with:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          strategy: regex
+          tag_prefix: "v"
+          root: version
+          regex_pattern: version=([0-9\.]{5}([-\+][\w\.0-9]+)?)
+
+    outputs:
+      tag: ${{ steps.tag.outputs.tagname }}
+      version: ${{ steps.tag.outputs.version }}
+
+
   build:
-    name: Build and release
+    name: Publish
+    needs: tag
+    if: ${{ needs.tag.outputs.tag == ''}}
     runs-on: ubuntu-latest
     env:
       GO111MODULE: "on"
@@ -28,16 +52,23 @@ jobs:
         run: |
           SENTRY_DSN=$SENTRY_DSN make buildAll
 
+      - name: Get Changelog Entry
+        id: changelog_reader
+        uses: mindsers/changelog-reader-action@v2
+        with:
+          version: ${{ needs.tag.outputs.version }}
+          path: ./CHANGELOG.md
+
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
-          draft: false
-          prerelease: false
+          tag_name: ${{ needs.tag.outputs.tag }}
+          body: ${{ steps.changelog_reader.outputs.changes }}
+          prerelease: true
+          release_name: Release ${{ needs.tag.outputs.tag }}
 
       - name: Upload Linux amd64
         id: vedran-daemon-linux-amd64
