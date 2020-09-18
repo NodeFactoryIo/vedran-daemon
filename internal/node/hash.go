@@ -99,7 +99,7 @@ func (client *client) GetConfigHash() (hash.Hash32, error) {
 
 func (client *client) getChainType() (string, error) {
 	var chainType RPCChainTypeResponse
-	_, err := client.SendRPCRequest("system_chainType", []string{}, &chainType)
+	_, err := client.sendRPCRequest("system_chainType", []string{}, &chainType)
 
 	if err != nil {
 		return "", err
@@ -110,7 +110,7 @@ func (client *client) getChainType() (string, error) {
 
 func (client *client) getChain() (string, error) {
 	var chain RPCChainResponse
-	_, err := client.SendRPCRequest("system_chain", []string{}, &chain)
+	_, err := client.sendRPCRequest("system_chain", []string{}, &chain)
 
 	if err != nil {
 		return "", err
@@ -121,7 +121,7 @@ func (client *client) getChain() (string, error) {
 
 func (client *client) getNodeRoles() ([]string, error) {
 	var nodeRoles RPCNodeRolesResponse
-	_, err := client.SendRPCRequest("system_nodeRoles", []string{}, &nodeRoles)
+	_, err := client.sendRPCRequest("system_nodeRoles", []string{}, &nodeRoles)
 
 	if err != nil {
 		return nil, err
@@ -132,7 +132,7 @@ func (client *client) getNodeRoles() ([]string, error) {
 
 func (client *client) getNodeProperties() (Properties, error) {
 	var properties RPCPropertiesResponse
-	_, err := client.SendRPCRequest("system_properties", []string{}, &properties)
+	_, err := client.sendRPCRequest("system_properties", []string{}, &properties)
 
 	if err != nil {
 		return Properties{}, err
@@ -143,7 +143,7 @@ func (client *client) getNodeProperties() (Properties, error) {
 
 func (client *client) getNodeRPCMethods() ([]string, error) {
 	var rpcMethods RPCMethodsResponse
-	_, err := client.SendRPCRequest("rpc_methods", []string{}, &rpcMethods)
+	_, err := client.sendRPCRequest("rpc_methods", []string{}, &rpcMethods)
 
 	if err != nil {
 		return nil, err

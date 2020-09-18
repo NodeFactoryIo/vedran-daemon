@@ -1,9 +1,11 @@
 package node
 
 import (
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"reflect"
 	"testing"
 )
 
@@ -84,5 +86,102 @@ func Test_client_GetMetricsURL(t *testing.T) {
 				t.Errorf("client.GetMetricsURL() = %v, want %v", got, tt.want)
 			}
 		})
+	}
+}
+
+func TestClient_SendRPCRequest(t *testing.T) {
+	setup()
+	defer teardown()
+
+	type ExpectedResponse struct {
+		Foo string `json:"foo"`
+	}
+	var testBody = new(ExpectedResponse)
+
+	type fields struct {
+		client  *http.Client
+		BaseURL string
+	}
+
+	type args struct {
+		method string
+		params []string
+		v      interface{}
+	}
+
+	tests := []struct {
+		name       string
+		fields     fields
+		args       args
+		want       *ExpectedResponse
+		wantErr    bool
+		handleFunc handleFnMock
+	}{
+		{
+			name:    "Returns error if status code not 200",
+			args:    args{"system_chain", []string{}, nil},
+			fields:  fields{http.DefaultClient, "valid"},
+			wantErr: true,
+			want:    nil,
+			handleFunc: func(w http.ResponseWriter, r *http.Request) {
+				http.Error(w, "Not Found", 404)
+			}},
+		{
+			name:    "Returns error if server url invalid",
+			args:    args{"system_chain", []string{}, nil},
+			fields:  fields{http.DefaultClient, "invalid"},
+			wantErr: true,
+			want:    nil,
+			handleFunc: func(w http.ResponseWriter, r *http.Request) {
+				http.Error(w, "Not Found", 404)
+			}},
+		{
+			name:    "Returns error if json unmarshal fails",
+			args:    args{"system_chain", []string{}, nil},
+			fields:  fields{http.DefaultClient, "valid"},
+			wantErr: true,
+			want:    nil,
+			handleFunc: func(w http.ResponseWriter, r *http.Request) {
+				_, _ = io.WriteString(w, `invalid`)
+			}},
+		{
+			name:    "Returns resp if request valid",
+			args:    args{"system_chain", []string{}, testBody},
+			fields:  fields{http.DefaultClient, "valid"},
+			wantErr: false,
+			want:    &ExpectedResponse{Foo: "bar"},
+			handleFunc: func(w http.ResponseWriter, r *http.Request) {
+				_, _ = io.WriteString(w, `{"foo": "bar"}`)
+			}},
+	}
+
+	for _, tt := range tests {
+		setup()
+
+		t.Run(tt.name, func(t *testing.T) {
+			var mockURL *url.URL
+			if tt.fields.BaseURL == "valid" {
+				mockURL, _ = url.Parse(server.URL)
+			} else {
+				mockURL, _ = url.Parse("http://invalid:3000")
+			}
+			c := &client{mockURL, mockURL}
+			mux.HandleFunc("/", tt.handleFunc)
+
+			got, err := c.sendRPCRequest(tt.args.method, tt.args.params, tt.args.v)
+
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Client.SendRPCRequest() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+
+			if got != nil {
+				if !reflect.DeepEqual(testBody, tt.want) {
+					t.Errorf("Client.SendRPCRequest() = %v, want %v", testBody, tt.want)
+				}
+			}
+		})
+
+		teardown()
 	}
 }

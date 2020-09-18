@@ -47,7 +47,7 @@ func (client *client) GetMetricsURL() string {
 }
 
 // SendsRPCRequest sends rpc request to node rpc url and decodes result to v
-func (client *client) SendRPCRequest(method string, params []string, v interface{}) (*http.Response, error) {
+func (client *client) sendRPCRequest(method string, params []string, v interface{}) (*http.Response, error) {
 	rpcReq := &RPCRequest{
 		ID:      1,
 		JSONRPC: "jsonrpc 2.0",
@@ -55,10 +55,7 @@ func (client *client) SendRPCRequest(method string, params []string, v interface
 		Params:  params,
 	}
 	buf := new(bytes.Buffer)
-	err := json.NewEncoder(buf).Encode(rpcReq)
-	if err != nil {
-		return nil, err
-	}
+	_ = json.NewEncoder(buf).Encode(rpcReq)
 
 	resp, err := http.Post(client.GetRPCURL(), "application/json", buf)
 
