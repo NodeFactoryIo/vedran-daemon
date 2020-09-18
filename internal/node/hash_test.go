@@ -23,6 +23,44 @@ func TestGetConfigHash(t *testing.T) {
 		handleFunc handleFnMock
 	}
 
+	methodsResponse := `{
+		"jsonrpc": "2.0",
+			"result": {
+			"methods": [
+				"system_chain",
+				"a_chain"
+			]
+		},
+		"id": 1
+	}`
+	nodeRolesResponse := `{
+		"jsonrpc": "2.0",
+		"result": [
+			"Full",
+			"Archive"
+		],
+		"id": 1
+	}`
+	chainResponse := `{
+		"jsonrpc": "2.0",
+		"result": "Polkadot",
+		"id": 1
+	}`
+	chainTypeResponse := `{
+		"jsonrpc": "2.0",
+		"result": "Live",
+		"id": 1
+	}`
+	propertiesResponse := `{
+		"jsonrpc": "2.0",
+		"result": {
+			"ss58format": 5,
+			"tokenDecimals": 0,
+			"tokenSymbol": "Dot"
+		},
+		"id": 1
+	}`
+
 	expectedHash := fnv.New32()
 	_, _ = expectedHash.Write([]byte("a_chainsystem_chain"))
 	_, _ = expectedHash.Write([]byte("ArchiveFull"))
@@ -60,19 +98,7 @@ func TestGetConfigHash(t *testing.T) {
 				_ = json.Unmarshal(body, &rpcRequest)
 
 				if rpcRequest.Method == "rpc_methods" {
-					_, _ = io.WriteString(
-						w,
-						`{
-							"jsonrpc": "2.0",
-							"result": {
-								"methods": [
-									"system_chain",
-									"a_chain"
-								],
-								"version": 1
-							},
-							"id": 1
-						}`)
+					_, _ = io.WriteString(w, methodsResponse)
 				} else if rpcRequest.Method == "system_nodeRoles" {
 					http.Error(w, "error", 404)
 				}
@@ -89,29 +115,9 @@ func TestGetConfigHash(t *testing.T) {
 				_ = json.Unmarshal(body, &rpcRequest)
 
 				if rpcRequest.Method == "rpc_methods" {
-					_, _ = io.WriteString(
-						w,
-						`{
-							"jsonrpc": "2.0",
-							"result": {
-								"methods": [
-									"system_chain",
-									"a_chain"
-								]
-							},
-							"id": 1
-						}`)
+					_, _ = io.WriteString(w, methodsResponse)
 				} else if rpcRequest.Method == "system_nodeRoles" {
-					_, _ = io.WriteString(
-						w,
-						`{
-							"jsonrpc": "2.0",
-							"result": [
-								"Full",
-								"Archive"
-							],
-							"id": 1
-						}`)
+					_, _ = io.WriteString(w, nodeRolesResponse)
 				} else if rpcRequest.Method == "system_chain" {
 					http.Error(w, "error", 404)
 				}
@@ -128,38 +134,11 @@ func TestGetConfigHash(t *testing.T) {
 				_ = json.Unmarshal(body, &rpcRequest)
 
 				if rpcRequest.Method == "rpc_methods" {
-					_, _ = io.WriteString(
-						w,
-						`{
-							"jsonrpc": "2.0",
-							"result": {
-								"methods": [
-									"system_chain",
-									"a_chain"
-								],
-								"version": 1
-							},
-							"id": 1
-						}`)
+					_, _ = io.WriteString(w, methodsResponse)
 				} else if rpcRequest.Method == "system_nodeRoles" {
-					_, _ = io.WriteString(
-						w,
-						`{
-							"jsonrpc": "2.0",
-							"result": [
-								"Full",
-								"Archive"
-							],
-							"id": 1
-						}`)
+					_, _ = io.WriteString(w, nodeRolesResponse)
 				} else if rpcRequest.Method == "system_chain" {
-					_, _ = io.WriteString(
-						w,
-						`{
-							"jsonrpc": "2.0",
-							"result": "Polkadot",
-							"id": 1
-						}`)
+					_, _ = io.WriteString(w, chainResponse)
 				} else if rpcRequest.Method == "system_chainType" {
 					http.Error(w, "error", 404)
 				}
@@ -176,46 +155,13 @@ func TestGetConfigHash(t *testing.T) {
 				_ = json.Unmarshal(body, &rpcRequest)
 
 				if rpcRequest.Method == "rpc_methods" {
-					_, _ = io.WriteString(
-						w,
-						`{
-							"jsonrpc": "2.0",
-							"result": {
-								"methods": [
-									"system_chain",
-									"a_chain"
-								],
-								"version": 1
-							},
-							"id": 1
-						}`)
+					_, _ = io.WriteString(w, methodsResponse)
 				} else if rpcRequest.Method == "system_nodeRoles" {
-					_, _ = io.WriteString(
-						w,
-						`{
-							"jsonrpc": "2.0",
-							"result": [
-								"Full",
-								"Archive"
-							],
-							"id": 1
-						}`)
+					_, _ = io.WriteString(w, nodeRolesResponse)
 				} else if rpcRequest.Method == "system_chain" {
-					_, _ = io.WriteString(
-						w,
-						`{
-							"jsonrpc": "2.0",
-							"result": "Polkadot",
-							"id": 1
-						}`)
+					_, _ = io.WriteString(w, chainResponse)
 				} else if rpcRequest.Method == "system_chainType" {
-					_, _ = io.WriteString(
-						w,
-						`{
-    					"jsonrpc": "2.0",
-    					"result": "Live",
-    					"id": 1
-						}`)
+					_, _ = io.WriteString(w, chainTypeResponse)
 				} else if rpcRequest.Method == "system_properties" {
 					http.Error(w, "error", 404)
 				}
@@ -232,58 +178,15 @@ func TestGetConfigHash(t *testing.T) {
 				_ = json.Unmarshal(body, &rpcRequest)
 
 				if rpcRequest.Method == "rpc_methods" {
-					_, _ = io.WriteString(
-						w,
-						`{
-							"jsonrpc": "2.0",
-							"result": {
-								"methods": [
-									"system_chain",
-									"a_chain"
-								],
-								"version": 1
-							},
-							"id": 1
-						}`)
+					_, _ = io.WriteString(w, methodsResponse)
 				} else if rpcRequest.Method == "system_nodeRoles" {
-					_, _ = io.WriteString(
-						w,
-						`{
-							"jsonrpc": "2.0",
-							"result": [
-								"Full",
-								"Archive"
-							],
-							"id": 1
-						}`)
+					_, _ = io.WriteString(w, nodeRolesResponse)
 				} else if rpcRequest.Method == "system_chain" {
-					_, _ = io.WriteString(
-						w,
-						`{
-							"jsonrpc": "2.0",
-							"result": "Polkadot",
-							"id": 1
-						}`)
+					_, _ = io.WriteString(w, chainResponse)
 				} else if rpcRequest.Method == "system_chainType" {
-					_, _ = io.WriteString(
-						w,
-						`{
-							"jsonrpc": "2.0",
-							"result": "Live",
-							"id": 1
-						}`)
+					_, _ = io.WriteString(w, chainTypeResponse)
 				} else if rpcRequest.Method == "system_properties" {
-					_, _ = io.WriteString(
-						w,
-						`{
-							"jsonrpc": "2.0",
-							"result": {
-								"ss58Format": 5,
-								"tokenDecimals": 0,
-								"tokenSymbol": "Dot"
-							},
-							"id": 1
-						}`)
+					_, _ = io.WriteString(w, propertiesResponse)
 				}
 			}},
 	}
