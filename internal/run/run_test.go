@@ -70,7 +70,7 @@ func TestStart(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			setup()
 
-			telemetryMock := &telemetryMocks.TelemetryInterface{}
+			telemetryMock := &telemetryMocks.Telemetry{}
 			telemetryMock.On("StartSendingTelemetry", mock.Anything, mock.Anything, mock.Anything).Return()
 			nodeClient.On("GetRPCURL").Return("http://localhost:9933")
 			url, _ := url.Parse(server.URL)

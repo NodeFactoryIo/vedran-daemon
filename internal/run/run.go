@@ -11,7 +11,7 @@ import (
 )
 
 // Start registers to load balancer and starts sending telemetry
-func Start(lbClient *lb.Client, nodeClient node.Client, telemetry telemetry.TelemetryInterface, id string, payoutAddress string) error {
+func Start(lbClient *lb.Client, nodeClient node.Client, telemetry telemetry.Telemetry, id string, payoutAddress string) error {
 	err := lbClient.Register(id, nodeClient.GetRPCURL(), payoutAddress, "test-config-hash")
 	if err != nil {
 		return err

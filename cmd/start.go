@@ -63,7 +63,7 @@ func init() {
 func start(cmd *cobra.Command, _ []string) error {
 	lbClient := lb.NewClient(lbURL)
 	nodeClient := node.NewClient(metricsURL, rpcURL)
-	telemetry := &telemetry.Telemetry{}
+	telemetry := telemetry.NewTelemetry()
 
 	err := run.Start(lbClient, nodeClient, telemetry, id, payoutAddress)
 	if err != nil {

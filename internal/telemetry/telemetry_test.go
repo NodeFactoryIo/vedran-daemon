@@ -31,7 +31,7 @@ func TestTelemetry_StartSendingTelemetry(t *testing.T) {
 
 		t.Run(tt.name, func(t *testing.T) {
 			mockScheduler := &schedulerMocks.Scheduler{}
-			telemetry := &Telemetry{}
+			telemetry := NewTelemetry()
 			mockScheduler.On("StartBlocking").Return()
 			mockScheduler.On("Every", mock.Anything).Return(gocron.NewScheduler(time.UTC).Every(10))
 

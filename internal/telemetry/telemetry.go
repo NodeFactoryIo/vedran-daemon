@@ -13,14 +13,20 @@ const (
 	pingSendInterval    = 5
 )
 
-type TelemetryInterface interface {
+// Telemetry is used for scheduling telemetry reports
+type Telemetry interface {
 	StartSendingTelemetry(scheduler scheduler.Scheduler, lbClient *lb.Client, nodeClient node.Client)
 }
 
-type Telemetry struct{}
+// NewTelemetry returns instance of Telemetry
+func NewTelemetry() Telemetry {
+	return &telemetry{}
+}
+
+type telemetry struct{}
 
 // StartSendingTelemetry start sending ping and metrics to load balancer and blocks current thread
-func (t *Telemetry) StartSendingTelemetry(scheduler scheduler.Scheduler, lbClient *lb.Client, nodeClient node.Client) {
+func (t *telemetry) StartSendingTelemetry(scheduler scheduler.Scheduler, lbClient *lb.Client, nodeClient node.Client) {
 	_, _ = scheduler.Every(metricsSendInterval).Seconds().Do(lbClient.Metrics.Send, nodeClient)
 	log.Println("Started sending metrics to load balancer")
 
