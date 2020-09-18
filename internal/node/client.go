@@ -1,7 +1,12 @@
 package node
 
 import (
+	"bytes"
+	"encoding/json"
+	"fmt"
 	"hash"
+	"io/ioutil"
+	"net/http"
 	"net/url"
 )
 
@@ -11,6 +16,14 @@ type Client interface {
 	GetConfigHash() (hash.Hash32, error)
 	GetRPCURL() string
 	GetMetricsURL() string
+}
+
+// RPCRequest is used for retrieving data from node
+type RPCRequest struct {
+	ID      int      `json:"id"`
+	JSONRPC string   `json:"jsonrpc"`
+	Method  string   `json:"method"`
+	Params  []string `json:"params"`
 }
 
 // NewClient creates node client instance
@@ -31,4 +44,36 @@ func (client *client) GetRPCURL() string {
 // GetMetricsURL returns metrics base url as string
 func (client *client) GetMetricsURL() string {
 	return client.MetricsBaseURL.String()
+}
+
+// SendsRPCRequest sends rpc request to node rpc url and decodes result to v
+func (client *client) SendRPCRequest(method string, params []string, v interface{}) (*http.Response, error) {
+	rpcReq := &RPCRequest{
+		ID:      1,
+		JSONRPC: "jsonrpc 2.0",
+		Method:  method,
+		Params:  params,
+	}
+	buf := new(bytes.Buffer)
+	err := json.NewEncoder(buf).Encode(rpcReq)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := http.Post(client.GetRPCURL(), "application/json", buf)
+
+	if err != nil {
+		return nil, err
+	} else if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("Node rpc request returned invalid status code: %d", resp.StatusCode)
+	}
+
+	defer resp.Body.Close()
+	body, _ := ioutil.ReadAll((resp.Body))
+	err = json.Unmarshal(body, &v)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, nil
 }

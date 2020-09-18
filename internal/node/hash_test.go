@@ -1,9 +1,11 @@
 package node
 
 import (
+	"encoding/json"
 	"hash"
 	"hash/fnv"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -14,88 +16,275 @@ import (
 
 func TestGetConfigHash(t *testing.T) {
 
-	type args struct {
-		baseURL string
-	}
-
 	type Test struct {
 		name       string
-		args       args
 		want       hash.Hash32
 		wantErr    bool
 		handleFunc handleFnMock
 	}
 
-	hash := fnv.New32()
-	_, _ = hash.Write([]byte("author_rotateKeyschain_getBlock"))
+	expectedHash := fnv.New32()
+	_, _ = expectedHash.Write([]byte("a_chainsystem_chain"))
+	_, _ = expectedHash.Write([]byte("ArchiveFull"))
+	_, _ = expectedHash.Write([]byte("Polkadot"))
+	_, _ = expectedHash.Write([]byte("Live"))
+	_, _ = expectedHash.Write([]byte("5"))
+	_, _ = expectedHash.Write([]byte("0"))
+	_, _ = expectedHash.Write([]byte("Dot"))
+
 	tests := []Test{
 		{
-			name:    "Returns error if node not started",
-			args:    args{"invalid"},
-			want:    nil,
-			wantErr: true,
-			handleFunc: func(w http.ResponseWriter, r *http.Request) {
-				http.Error(w, "Not Found", 404)
-			}},
-		{
-			name:    "Returns error if rpc method does not exist",
-			args:    args{"valid"},
+			name:    "Returns error if getNodeRPCMethods fails",
 			want:    nil,
 			wantErr: true,
 			handleFunc: func(w http.ResponseWriter, r *http.Request) {
 				assert.Equal(t, http.MethodPost, r.Method)
-				http.Error(w, "Not Found", 404)
+				var rpcRequest RPCRequest
+				defer r.Body.Close()
+				body, _ := ioutil.ReadAll((r.Body))
+				_ = json.Unmarshal(body, &rpcRequest)
+
+				if rpcRequest.Method == "rpc_methods" {
+					http.Error(w, "error", 404)
+				}
 			}},
 		{
-			name:    "Returns error if parsing rpc methods fails",
-			args:    args{"valid"},
+			name:    "Returns error if getNodeRoles fails",
 			want:    nil,
 			wantErr: true,
 			handleFunc: func(w http.ResponseWriter, r *http.Request) {
 				assert.Equal(t, http.MethodPost, r.Method)
-				_, _ = io.WriteString(w, `invalid`)
+				var rpcRequest RPCRequest
+				defer r.Body.Close()
+				body, _ := ioutil.ReadAll((r.Body))
+				_ = json.Unmarshal(body, &rpcRequest)
+
+				if rpcRequest.Method == "rpc_methods" {
+					_, _ = io.WriteString(
+						w,
+						`{
+							"jsonrpc": "2.0",
+							"result": {
+								"methods": [
+									"system_chain",
+									"a_chain"
+								],
+								"version": 1
+							},
+							"id": 1
+						}`)
+				} else if rpcRequest.Method == "system_nodeRoles" {
+					http.Error(w, "error", 404)
+				}
 			}},
 		{
-			name:    "Returns error if no rpc methods found",
-			args:    args{"valid"},
+			name:    "Returns error if getChain fails",
 			want:    nil,
 			wantErr: true,
 			handleFunc: func(w http.ResponseWriter, r *http.Request) {
 				assert.Equal(t, http.MethodPost, r.Method)
-				w.Header().Set("Content-Type", "application/json")
-				_, _ = io.WriteString(
-					w,
-					`{
-						"jsonrpc": 2.0,
-						"result": {
-							"methods": [
+				var rpcRequest RPCRequest
+				defer r.Body.Close()
+				body, _ := ioutil.ReadAll((r.Body))
+				_ = json.Unmarshal(body, &rpcRequest)
+
+				if rpcRequest.Method == "rpc_methods" {
+					_, _ = io.WriteString(
+						w,
+						`{
+							"jsonrpc": "2.0",
+							"result": {
+								"methods": [
+									"system_chain",
+									"a_chain"
+								]
+							},
+							"id": 1
+						}`)
+				} else if rpcRequest.Method == "system_nodeRoles" {
+					_, _ = io.WriteString(
+						w,
+						`{
+							"jsonrpc": "2.0",
+							"result": [
+								"Full",
+								"Archive"
 							],
-							"version": 1
-						},
-						"id": 1
-					}`)
+							"id": 1
+						}`)
+				} else if rpcRequest.Method == "system_chain" {
+					http.Error(w, "error", 404)
+				}
 			}},
 		{
-			name:    "Returns hash if rpc response valid",
-			args:    args{"valid"},
-			want:    hash,
+			name:    "Returns error if getChainType fails",
+			want:    nil,
+			wantErr: true,
+			handleFunc: func(w http.ResponseWriter, r *http.Request) {
+				assert.Equal(t, http.MethodPost, r.Method)
+				var rpcRequest RPCRequest
+				defer r.Body.Close()
+				body, _ := ioutil.ReadAll((r.Body))
+				_ = json.Unmarshal(body, &rpcRequest)
+
+				if rpcRequest.Method == "rpc_methods" {
+					_, _ = io.WriteString(
+						w,
+						`{
+							"jsonrpc": "2.0",
+							"result": {
+								"methods": [
+									"system_chain",
+									"a_chain"
+								],
+								"version": 1
+							},
+							"id": 1
+						}`)
+				} else if rpcRequest.Method == "system_nodeRoles" {
+					_, _ = io.WriteString(
+						w,
+						`{
+							"jsonrpc": "2.0",
+							"result": [
+								"Full",
+								"Archive"
+							],
+							"id": 1
+						}`)
+				} else if rpcRequest.Method == "system_chain" {
+					_, _ = io.WriteString(
+						w,
+						`{
+							"jsonrpc": "2.0",
+							"result": "Polkadot",
+							"id": 1
+						}`)
+				} else if rpcRequest.Method == "system_chainType" {
+					http.Error(w, "error", 404)
+				}
+			}},
+		{
+			name:    "Returns error if getNodeProperties fails",
+			want:    nil,
+			wantErr: true,
+			handleFunc: func(w http.ResponseWriter, r *http.Request) {
+				assert.Equal(t, http.MethodPost, r.Method)
+				var rpcRequest RPCRequest
+				defer r.Body.Close()
+				body, _ := ioutil.ReadAll((r.Body))
+				_ = json.Unmarshal(body, &rpcRequest)
+
+				if rpcRequest.Method == "rpc_methods" {
+					_, _ = io.WriteString(
+						w,
+						`{
+							"jsonrpc": "2.0",
+							"result": {
+								"methods": [
+									"system_chain",
+									"a_chain"
+								],
+								"version": 1
+							},
+							"id": 1
+						}`)
+				} else if rpcRequest.Method == "system_nodeRoles" {
+					_, _ = io.WriteString(
+						w,
+						`{
+							"jsonrpc": "2.0",
+							"result": [
+								"Full",
+								"Archive"
+							],
+							"id": 1
+						}`)
+				} else if rpcRequest.Method == "system_chain" {
+					_, _ = io.WriteString(
+						w,
+						`{
+							"jsonrpc": "2.0",
+							"result": "Polkadot",
+							"id": 1
+						}`)
+				} else if rpcRequest.Method == "system_chainType" {
+					_, _ = io.WriteString(
+						w,
+						`{
+    					"jsonrpc": "2.0",
+    					"result": "Live",
+    					"id": 1
+						}`)
+				} else if rpcRequest.Method == "system_properties" {
+					http.Error(w, "error", 404)
+				}
+			}},
+		{
+			name:    "Returns valid hash if rpc calls succeed",
+			want:    expectedHash,
 			wantErr: false,
 			handleFunc: func(w http.ResponseWriter, r *http.Request) {
 				assert.Equal(t, http.MethodPost, r.Method)
-				w.Header().Set("Content-Type", "application/json")
-				_, _ = io.WriteString(
-					w,
-					`{
-						"jsonrpc": 2.0,
-						"result": {
-							"methods": [
-								"chain_getBlock",
-								"author_rotateKeys"
+				var rpcRequest RPCRequest
+				defer r.Body.Close()
+				body, _ := ioutil.ReadAll((r.Body))
+				_ = json.Unmarshal(body, &rpcRequest)
+
+				if rpcRequest.Method == "rpc_methods" {
+					_, _ = io.WriteString(
+						w,
+						`{
+							"jsonrpc": "2.0",
+							"result": {
+								"methods": [
+									"system_chain",
+									"a_chain"
+								],
+								"version": 1
+							},
+							"id": 1
+						}`)
+				} else if rpcRequest.Method == "system_nodeRoles" {
+					_, _ = io.WriteString(
+						w,
+						`{
+							"jsonrpc": "2.0",
+							"result": [
+								"Full",
+								"Archive"
 							],
-							"version": 1
-						},
-						"id": 1
-					}`)
+							"id": 1
+						}`)
+				} else if rpcRequest.Method == "system_chain" {
+					_, _ = io.WriteString(
+						w,
+						`{
+							"jsonrpc": "2.0",
+							"result": "Polkadot",
+							"id": 1
+						}`)
+				} else if rpcRequest.Method == "system_chainType" {
+					_, _ = io.WriteString(
+						w,
+						`{
+							"jsonrpc": "2.0",
+							"result": "Live",
+							"id": 1
+						}`)
+				} else if rpcRequest.Method == "system_properties" {
+					_, _ = io.WriteString(
+						w,
+						`{
+							"jsonrpc": "2.0",
+							"result": {
+								"ss58Format": 5,
+								"tokenDecimals": 0,
+								"tokenSymbol": "Dot"
+							},
+							"id": 1
+						}`)
+				}
 			}},
 	}
 
@@ -104,15 +293,10 @@ func TestGetConfigHash(t *testing.T) {
 		defer teardown()
 
 		t.Run(tt.name, func(t *testing.T) {
-			var baseURL *url.URL
-			if tt.args.baseURL == "valid" {
-				baseURL, _ = url.Parse(server.URL)
-			} else {
-				baseURL, _ = url.Parse("http://invalid:3003")
-			}
+			baseURL, _ := url.Parse(server.URL)
 			mux.HandleFunc("/", tt.handleFunc)
-
 			client := NewClient(baseURL, baseURL)
+
 			got, err := client.GetConfigHash()
 
 			if (err != nil) != tt.wantErr {
