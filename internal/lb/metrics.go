@@ -1,11 +1,12 @@
 package lb
 
 import (
-	"log"
+	"fmt"
 	"net/http"
 
 	"github.com/NodeFactoryIo/vedran-daemon/internal/node"
 	"github.com/getsentry/sentry-go"
+	log "github.com/sirupsen/logrus"
 )
 
 // MetricsService is used for sending node metrics to load balancer
@@ -27,12 +28,12 @@ func (ms *metricsService) Send(client node.Client) (*http.Response, error) {
 		return nil, err
 	}
 
-	log.Println("Sending metrics to load balancer")
+	log.Info("Sending metrics to load balancer")
 	req, _ := ms.client.newRequest(http.MethodPut, metricsEndpoint, metrics)
 	resp, err := ms.client.do(req, nil)
 
 	if err != nil {
-		log.Printf("Falied sending metrics to load balancer because of: %v", err)
+		log.Error(fmt.Sprintf("Failed sending metrics to load balancer because of: %v", err))
 		sentry.CaptureException(err)
 		return nil, err
 	}
