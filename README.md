@@ -18,16 +18,18 @@ Note that if you need to do this, you probably want to add your Go bin directory
 
 ```
 $ vedran-daemon -h
-
-vedran-daemon is a command line interface for ....
+Register vedran-daemon with load balancer and start sending telemetry
 
 Usage:
-  vedran-daemon [command]
+  vedran-daemon [flags]
 
-Available Commands:
-  version     Show the current version of Vedran deamon app
-
-Use "vedran-daemon [command] --help" for more information about a command.
+Flags:
+  -h, --help                    help for vedran-daemon
+      --id string               Vedran-daemon id string (required)
+      --lb string               Target load balancer url (required)
+      --node-metrics string     Polkadot node metrics url (default "localhost:9615")
+      --node-rpc string         Polkadot node rpc url (default "localhost:9933")
+      --payout-address string   Payout address to which reward tokens will be sent (required)
 ```
 
 ## Development

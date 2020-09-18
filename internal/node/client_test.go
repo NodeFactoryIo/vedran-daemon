@@ -1,9 +1,10 @@
-package metrics
+package node
 
 import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"reflect"
 	"testing"
 
@@ -26,7 +27,7 @@ func teardown() {
 	server.Close()
 }
 
-func TestGetNodeMetrics(t *testing.T) {
+func TestGetMetrics(t *testing.T) {
 	type args struct {
 		baseURL string
 	}
@@ -104,25 +105,90 @@ func TestGetNodeMetrics(t *testing.T) {
 		defer teardown()
 
 		t.Run(tt.name, func(t *testing.T) {
+			var baseURL *url.URL
 			if tt.args.baseURL == "valid" {
-				tt.args.baseURL = server.URL
+				baseURL, _ = url.Parse(server.URL)
 			} else {
-				tt.args.baseURL = "http://invalid:3000"
+				baseURL, _ = url.Parse("http://invalid:3000")
 			}
 			mux.HandleFunc("/metrics", tt.handleFunc)
 
-			fms := &FetchMetricsService{tt.args.baseURL}
-			got, err := fms.GetNodeMetrics()
+			nodeClient := NewClient(baseURL, baseURL)
+			got, err := nodeClient.GetMetrics()
 
 			if (err != nil) != tt.wantErr {
-				t.Errorf("GetNodeMetrics() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("GetMetrics() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("GetNodeMetrics() = %v, want %v", got, tt.want)
+				t.Errorf("GetMetrics() = %v, want %v", got, tt.want)
 			}
 
+		})
+	}
+}
+
+func Test_client_GetRPCURL(t *testing.T) {
+	rpcURL, _ := url.Parse("http://localhost:9933")
+	metricsURL, _ := url.Parse("http://localhost:9615")
+
+	type fields struct {
+		MetricsBaseURL *url.URL
+		RPCBaseURL     *url.URL
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   string
+	}{
+		{
+			name:   "Returns string representation of rpc url",
+			fields: fields{metricsURL, rpcURL},
+			want:   "http://localhost:9933"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			client := &client{
+				MetricsBaseURL: tt.fields.MetricsBaseURL,
+				RPCBaseURL:     tt.fields.RPCBaseURL,
+			}
+
+			if got := client.GetRPCURL(); got != tt.want {
+				t.Errorf("client.GetRPCURL() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_client_GetMetricsURL(t *testing.T) {
+	rpcURL, _ := url.Parse("http://localhost:9933")
+	metricsURL, _ := url.Parse("http://localhost:9615")
+
+	type fields struct {
+		MetricsBaseURL *url.URL
+		RPCBaseURL     *url.URL
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   string
+	}{
+		{
+			name:   "Returns string representation of rpc url",
+			fields: fields{metricsURL, rpcURL},
+			want:   "http://localhost:9615"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			client := &client{
+				MetricsBaseURL: tt.fields.MetricsBaseURL,
+				RPCBaseURL:     tt.fields.RPCBaseURL,
+			}
+
+			if got := client.GetMetricsURL(); got != tt.want {
+				t.Errorf("client.GetMetricsURL() = %v, want %v", got, tt.want)
+			}
 		})
 	}
 }

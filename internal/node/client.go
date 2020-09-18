@@ -1,15 +1,21 @@
-package metrics
+package node
 
 import (
 	"fmt"
+	"hash"
+	"hash/fnv"
 	"net/http"
+	"net/url"
 
 	"github.com/prometheus/common/expfmt"
 )
 
-// FetchMetrics is used to scrape metrics data from prometheus server
-type FetchMetrics interface {
-	GetNodeMetrics() (*Metrics, error)
+// Client is used to interact with polkadot node
+type Client interface {
+	GetMetrics() (*Metrics, error)
+	GetConfigHash() (hash.Hash32, error)
+	GetRPCURL() string
+	GetMetricsURL() string
 }
 
 // Metrics required to be sent to load balancer
@@ -20,17 +26,34 @@ type Metrics struct {
 	ReadyTransactionCount *float64 `json:"read_transaction_count"`
 }
 
-type FetchMetricsService struct {
-	BaseURL string
+// NewClient creates node client instance
+func NewClient(rpcURL *url.URL, metricsURL *url.URL) Client {
+	return &client{MetricsBaseURL: metricsURL, RPCBaseURL: rpcURL}
+}
+
+type client struct {
+	MetricsBaseURL *url.URL
+	RPCBaseURL     *url.URL
 }
 
 const (
 	metricsEndpoint = "/metrics"
 )
 
+// GetRPCURL returns rpc base url as string
+func (client *client) GetRPCURL() string {
+	return client.RPCBaseURL.String()
+}
+
+// GetMetricsURL returns metrics base url as string
+func (client *client) GetMetricsURL() string {
+	return client.MetricsBaseURL.String()
+}
+
 // GetNodeMetrics retrieves polkadot metrics from prometheus server
-func (fms *FetchMetricsService) GetNodeMetrics() (*Metrics, error) {
-	resp, err := http.Get(fms.BaseURL + metricsEndpoint)
+func (client *client) GetMetrics() (*Metrics, error) {
+	metricsURL, _ := client.MetricsBaseURL.Parse(metricsEndpoint)
+	resp, err := http.Get(metricsURL.String())
 	if err != nil {
 		return nil, fmt.Errorf("Metrics endpoint returned error: %v", err)
 	} else if resp.StatusCode != http.StatusOK {
@@ -51,4 +74,16 @@ func (fms *FetchMetricsService) GetNodeMetrics() (*Metrics, error) {
 		metricFamilies["polkadot_ready_transactions_number"].GetMetric()[0].Gauge.Value,
 	}
 	return metrics, nil
+}
+
+// GetConfigHash returns sorted hash of supported rpc methods3
+func (client *client) GetConfigHash() (hash.Hash32, error) {
+	hash := fnv.New32()
+
+	_, err := hash.Write([]byte("TODO:hash"))
+	if err != nil {
+		return nil, err
+	}
+
+	return hash, nil
 }
