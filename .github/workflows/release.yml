@@ -32,7 +32,7 @@ jobs:
   publish:
     name: Publish
     needs: tag
-    if: ${{ needs.tag.outputs.tag == ''}}
+    if: ${{ needs.tag.outputs.tag != ''}}
     runs-on: ubuntu-latest
     env:
       GO111MODULE: "on"
