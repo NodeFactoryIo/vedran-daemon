@@ -1,6 +1,9 @@
 package run
 
 import (
+	"fmt"
+	"hash"
+	"hash/fnv"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -36,6 +39,7 @@ func TestStart(t *testing.T) {
 	lbURL, _ := url.Parse(server.URL)
 	lbClient := lb.NewClient(lbURL)
 	nodeClient := &nodeMocks.Client{}
+	testHash := fnv.New32()
 
 	type args struct {
 		client        *lb.Client
@@ -49,21 +53,36 @@ func TestStart(t *testing.T) {
 		wantErr                     bool
 		handleFunc                  handleFnMock
 		startSendingTelemetryResult error
+		getConfigHashResult         hash.Hash32
+		getConfigHashError          error
 	}{
+		{
+			name:    "Returns error if get config hash fails",
+			args:    args{lbClient, "test-id", "0xtestpayoutaddress"},
+			wantErr: true,
+			handleFunc: func(w http.ResponseWriter, r *http.Request) {
+				http.Error(w, "Not Found", 404)
+			},
+			getConfigHashError:  fmt.Errorf("Error"),
+			getConfigHashResult: nil},
 		{
 			name:    "Returns error if lb register fails",
 			args:    args{lbClient, "test-id", "0xtestpayoutaddress"},
 			wantErr: true,
 			handleFunc: func(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, "Not Found", 404)
-			}},
+			},
+			getConfigHashError:  nil,
+			getConfigHashResult: testHash},
 		{
 			name:    "Returns nil if startSendingTelemetry succeeds",
 			args:    args{lbClient, "test-id", "0xtestpayoutaddress"},
 			wantErr: false,
 			handleFunc: func(w http.ResponseWriter, r *http.Request) {
 				_, _ = io.WriteString(w, `{"token": "test-token"}`)
-			}},
+			},
+			getConfigHashError:  nil,
+			getConfigHashResult: testHash},
 	}
 
 	for _, tt := range tests {
@@ -73,6 +92,7 @@ func TestStart(t *testing.T) {
 			telemetryMock := &telemetryMocks.Telemetry{}
 			telemetryMock.On("StartSendingTelemetry", mock.Anything, mock.Anything, mock.Anything).Return()
 			nodeClient.On("GetRPCURL").Return("http://localhost:9933")
+			nodeClient.On("GetConfigHash").Once().Return(tt.getConfigHashResult, tt.getConfigHashError)
 			url, _ := url.Parse(server.URL)
 			lbClient.BaseURL = url
 			mux.HandleFunc("/api/v1/nodes", tt.handleFunc)
