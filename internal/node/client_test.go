@@ -139,7 +139,7 @@ func TestClient_SendRPCRequest(t *testing.T) {
 					"error": {
 						"code": -32600,
 						"message": "Error"
-					}
+					},
 					"id": 1
 				}`)
 			}},
