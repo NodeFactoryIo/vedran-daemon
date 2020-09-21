@@ -24,8 +24,10 @@ func TestGetConfigHash(t *testing.T) {
 	}
 
 	errorStr := `{
-		"code": -32600,
-		"message": "Invalid Request",
+		"error": {
+			"code": -32600,
+			"message": "Invalid Request"
+		}
 		"jsonrpc": "2.0",
 		"id": 1
 	}`

@@ -20,6 +20,12 @@ type Client interface {
 	GetMetricsURL() string
 }
 
+// RPCError is error returned if rpc request fails
+type RPCError struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+}
+
 // RPCRequest is used for retrieving data from node
 type RPCRequest struct {
 	ID      int      `json:"id"`
@@ -31,8 +37,7 @@ type RPCRequest struct {
 // RPCResponse is response from rpc request
 type RPCResponse struct {
 	JSONRPC string      `json:"jsonrpc"`
-	Code    int         `json:"code"`
-	Message string      `json:"message"`
+	Error   RPCError    `json:"error"`
 	ID      int         `json:"id"`
 	Result  interface{} `json:"result"`
 }
@@ -61,7 +66,7 @@ func (client *client) GetMetricsURL() string {
 func (client *client) sendRPCRequest(method string, params []string, v interface{}) (*http.Response, error) {
 	rpcReq := &RPCRequest{
 		ID:      1,
-		JSONRPC: "jsonrpc 2.0",
+		JSONRPC: "2.0",
 		Method:  method,
 		Params:  params,
 	}
@@ -80,8 +85,8 @@ func (client *client) sendRPCRequest(method string, params []string, v interface
 
 	if err != nil {
 		return nil, err
-	} else if rpcResponse.Code != 0 {
-		return nil, fmt.Errorf("Node rpc request returned invalid status code: %d", rpcResponse.Code)
+	} else if rpcResponse.Error != (RPCError{}) {
+		return nil, fmt.Errorf("Node rpc request returned invalid status code: %v", rpcResponse.Error)
 	}
 
 	err = mapstructure.Decode(rpcResponse.Result, &v)

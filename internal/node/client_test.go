@@ -136,7 +136,10 @@ func TestClient_SendRPCRequest(t *testing.T) {
 			handleFunc: func(w http.ResponseWriter, r *http.Request) {
 				_, _ = io.WriteString(w, `{
 					"jsonrpc": "2.0",
-					"code": -32600
+					"error": {
+						"code": -32600,
+						"message": "Error"
+					}
 					"id": 1
 				}`)
 			}},
