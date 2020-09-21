@@ -1,7 +1,6 @@
 package run
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/NodeFactoryIo/vedran-daemon/internal/lb"
@@ -17,7 +16,7 @@ func Start(lbClient *lb.Client, nodeClient node.Client, telemetry telemetry.Tele
 	if err != nil {
 		return err
 	}
-	log.Info(fmt.Sprintf("Registered to load balancer %s", lbClient.BaseURL.String()))
+	log.Infof("Registered to load balancer %s", lbClient.BaseURL.String())
 
 	scheduler := gocron.NewScheduler(time.UTC)
 	telemetry.StartSendingTelemetry(scheduler, lbClient, nodeClient)
