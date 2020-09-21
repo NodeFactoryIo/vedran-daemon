@@ -201,9 +201,7 @@ func TestClient_SendRPCRequest(t *testing.T) {
 			}
 
 			if got != nil {
-				var result = new(ValidResult)
-				result = &tt.want
-				if !reflect.DeepEqual(validResult, result) {
+				if !reflect.DeepEqual(validResult, &tt.want) {
 					t.Errorf("Client.SendRPCRequest() = %v, want %v", validResult, tt.want)
 				}
 			}
