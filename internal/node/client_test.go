@@ -7,8 +7,6 @@ import (
 	"net/url"
 	"reflect"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
 var (
@@ -25,108 +23,6 @@ func setup() {
 
 func teardown() {
 	server.Close()
-}
-
-func TestGetMetrics(t *testing.T) {
-	type args struct {
-		baseURL string
-	}
-
-	type Test struct {
-		name       string
-		args       args
-		want       *Metrics
-		wantErr    bool
-		handleFunc handleFnMock
-	}
-
-	peerCount := float64(19)
-	bestBlockHeight := float64(432933)
-	finalizedBlockHeight := float64(432640)
-	readyTransactionCount := float64(0)
-	tests := []Test{
-		{
-			name:    "Returns error if metrics endpoint does not exist",
-			args:    args{"invalid"},
-			want:    nil,
-			wantErr: true,
-			handleFunc: func(w http.ResponseWriter, r *http.Request) {
-				http.Error(w, "Not Found", 404)
-			}},
-		{
-			name:    "Returns error if metrics endpoint returns not found",
-			args:    args{"valid"},
-			want:    nil,
-			wantErr: true,
-			handleFunc: func(w http.ResponseWriter, r *http.Request) {
-				http.Error(w, "Not Found", 404)
-			}},
-		{
-			name:    "Returns error if parsing metrics fails",
-			args:    args{"valid"},
-			want:    nil,
-			wantErr: true,
-			handleFunc: func(w http.ResponseWriter, r *http.Request) {
-				assert.Equal(t, http.MethodGet, r.Method)
-				_, _ = io.WriteString(w, `invalid`)
-			}},
-		{
-			name: "Returns metrics if prometheus response valid",
-			args: args{"valid"},
-			want: &Metrics{
-				PeerCount:             &peerCount,
-				BestBlockHeight:       &bestBlockHeight,
-				FinalizedBlockHeight:  &finalizedBlockHeight,
-				ReadyTransactionCount: &readyTransactionCount,
-			},
-			wantErr: false,
-			handleFunc: func(w http.ResponseWriter, r *http.Request) {
-				assert.Equal(t, http.MethodGet, r.Method)
-				_, _ = io.WriteString(
-					w,
-					`
-					# HELP polkadot_sync_peers Number of peers we sync with
-					# TYPE polkadot_sync_peers gauge
-					polkadot_sync_peers 19
-					# HELP polkadot_block_height Block height info of the chain
-					# TYPE polkadot_block_height gauge
-					polkadot_block_height{status="best"} 432933
-					polkadot_block_height{status="finalized"} 432640
-					polkadot_block_height{status="sync_target"} 1547694
-					# HELP polkadot_ready_transactions_number Number of transactions in the ready queue
-					# TYPE polkadot_ready_transactions_number gauge
-					polkadot_ready_transactions_number 0
-					`)
-			}},
-	}
-
-	for _, tt := range tests {
-		setup()
-		defer teardown()
-
-		t.Run(tt.name, func(t *testing.T) {
-			var baseURL *url.URL
-			if tt.args.baseURL == "valid" {
-				baseURL, _ = url.Parse(server.URL)
-			} else {
-				baseURL, _ = url.Parse("http://invalid:3000")
-			}
-			mux.HandleFunc("/metrics", tt.handleFunc)
-
-			nodeClient := NewClient(baseURL, baseURL)
-			got, err := nodeClient.GetMetrics()
-
-			if (err != nil) != tt.wantErr {
-				t.Errorf("GetMetrics() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("GetMetrics() = %v, want %v", got, tt.want)
-			}
-
-		})
-	}
 }
 
 func Test_client_GetRPCURL(t *testing.T) {
@@ -190,5 +86,136 @@ func Test_client_GetMetricsURL(t *testing.T) {
 				t.Errorf("client.GetMetricsURL() = %v, want %v", got, tt.want)
 			}
 		})
+	}
+}
+
+func TestClient_SendRPCRequest(t *testing.T) {
+	setup()
+	defer teardown()
+
+	type InvalidResult []string
+	type ValidResult string
+
+	invalidResult := new(InvalidResult)
+	validResult := new(ValidResult)
+
+	type fields struct {
+		client  *http.Client
+		BaseURL string
+	}
+
+	type args struct {
+		method string
+		params []string
+		v      interface{}
+	}
+
+	tests := []struct {
+		name       string
+		fields     fields
+		args       args
+		want       ValidResult
+		wantErr    bool
+		handleFunc handleFnMock
+	}{
+		{
+			name:    "Returns error if server url invalid",
+			args:    args{"system_chain", []string{}, nil},
+			fields:  fields{http.DefaultClient, "invalid"},
+			wantErr: true,
+			want:    "",
+			handleFunc: func(w http.ResponseWriter, r *http.Request) {
+				http.Error(w, "Not Found", 404)
+			}},
+		{
+			name:    "Returns error if response not 200",
+			args:    args{"system_chain", []string{}, nil},
+			fields:  fields{http.DefaultClient, "valid"},
+			wantErr: true,
+			want:    "",
+			handleFunc: func(w http.ResponseWriter, r *http.Request) {
+				http.Error(w, "Not Found", 404)
+			}},
+		{
+			name:    "Returns error if rpc code not 200",
+			args:    args{"system_chain", []string{}, validResult},
+			fields:  fields{http.DefaultClient, "valid"},
+			wantErr: true,
+			want:    "",
+			handleFunc: func(w http.ResponseWriter, r *http.Request) {
+				_, _ = io.WriteString(w, `{
+					"jsonrpc": "2.0",
+					"error": {
+						"code": -32600,
+						"message": "Error"
+					},
+					"id": 1
+				}`)
+			}},
+		{
+			name:    "Returns error if json unmarshal fails",
+			args:    args{"system_chain", []string{}, validResult},
+			fields:  fields{http.DefaultClient, "valid"},
+			wantErr: true,
+			want:    "",
+			handleFunc: func(w http.ResponseWriter, r *http.Request) {
+				_, _ = io.WriteString(w, `invalid`)
+			}},
+		{
+			name:    "Returns error if map structure decode fails",
+			args:    args{"system_chain", []string{}, invalidResult},
+			fields:  fields{http.DefaultClient, "valid"},
+			wantErr: true,
+			want:    "",
+			handleFunc: func(w http.ResponseWriter, r *http.Request) {
+				_, _ = io.WriteString(w, `{
+					"jsonrpc": "2.0",
+					"result": "Live",
+					"id": 1
+				}`)
+			}},
+		{
+			name:    "Returns resp if request valid",
+			args:    args{"system_chain", []string{}, validResult},
+			fields:  fields{http.DefaultClient, "valid"},
+			wantErr: false,
+			want:    "Live",
+			handleFunc: func(w http.ResponseWriter, r *http.Request) {
+				_, _ = io.WriteString(w, `{
+					"jsonrpc": "2.0",
+					"result": "Live",
+					"id": 1
+				}`)
+			}},
+	}
+
+	for _, tt := range tests {
+		setup()
+
+		t.Run(tt.name, func(t *testing.T) {
+			var mockURL *url.URL
+			if tt.fields.BaseURL == "valid" {
+				mockURL, _ = url.Parse(server.URL)
+			} else {
+				mockURL, _ = url.Parse("http://invalid:3000")
+			}
+			c := &client{mockURL, mockURL}
+			mux.HandleFunc("/", tt.handleFunc)
+
+			got, err := c.sendRPCRequest(tt.args.method, tt.args.params, tt.args.v)
+
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Client.SendRPCRequest() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+
+			if got != nil {
+				if !reflect.DeepEqual(validResult, &tt.want) {
+					t.Errorf("Client.SendRPCRequest() = %v, want %v", validResult, tt.want)
+				}
+			}
+		})
+
+		teardown()
 	}
 }

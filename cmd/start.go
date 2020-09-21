@@ -66,8 +66,8 @@ var startCmd = &cobra.Command{
 }
 
 func init() {
-	startCmd.Flags().StringVar(&nodeRPCURL, "node-rpc", "localhost:9933", "Polkadot node rpc url")
-	startCmd.Flags().StringVar(&nodeMetricsURL, "node-metrics", "localhost:9615", "Polkadot node metrics url")
+	startCmd.Flags().StringVar(&nodeRPCURL, "node-rpc", "http://localhost:9933", "Polkadot node rpc url")
+	startCmd.Flags().StringVar(&nodeMetricsURL, "node-metrics", "http://localhost:9615", "Polkadot node metrics url")
 	startCmd.Flags().StringVar(&id, "id", "", "Vedran-daemon id string (required)")
 	startCmd.Flags().StringVar(&lbBaseURL, "lb", "", "Target load balancer url (required)")
 	startCmd.Flags().StringVar(&payoutAddress, "payout-address", "", "Payout address to which reward tokens will be sent (required)")
@@ -81,7 +81,7 @@ func init() {
 
 func start(cmd *cobra.Command, _ []string) error {
 	lbClient := lb.NewClient(lbURL)
-	nodeClient := node.NewClient(metricsURL, rpcURL)
+	nodeClient := node.NewClient(rpcURL, metricsURL)
 	telemetry := telemetry.NewTelemetry()
 
 	err := run.Start(lbClient, nodeClient, telemetry, id, payoutAddress)

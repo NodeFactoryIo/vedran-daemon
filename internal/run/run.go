@@ -1,6 +1,7 @@
 package run
 
 import (
+	"encoding/base64"
 	"time"
 
 	"github.com/NodeFactoryIo/vedran-daemon/internal/lb"
@@ -12,7 +13,12 @@ import (
 
 // Start registers to load balancer and starts sending telemetry
 func Start(lbClient *lb.Client, nodeClient node.Client, telemetry telemetry.Telemetry, id string, payoutAddress string) error {
-	err := lbClient.Register(id, nodeClient.GetRPCURL(), payoutAddress, "test-config-hash")
+	configHash, err := nodeClient.GetConfigHash()
+	if err != nil {
+		return err
+	}
+
+	err = lbClient.Register(id, nodeClient.GetRPCURL(), payoutAddress, base64.StdEncoding.EncodeToString(configHash.Sum(nil)[:]))
 	if err != nil {
 		return err
 	}

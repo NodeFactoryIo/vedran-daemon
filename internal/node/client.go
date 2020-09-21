@@ -1,13 +1,15 @@
 package node
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"hash"
-	"hash/fnv"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 
-	"github.com/prometheus/common/expfmt"
+	"github.com/mitchellh/mapstructure"
 )
 
 // Client is used to interact with polkadot node
@@ -18,12 +20,26 @@ type Client interface {
 	GetMetricsURL() string
 }
 
-// Metrics required to be sent to load balancer
-type Metrics struct {
-	PeerCount             *float64 `json:"peer_count"`
-	BestBlockHeight       *float64 `json:"best_block_height"`
-	FinalizedBlockHeight  *float64 `json:"finalized_block_height"`
-	ReadyTransactionCount *float64 `json:"read_transaction_count"`
+// RPCError is error returned if rpc request fails
+type RPCError struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+}
+
+// RPCRequest is used for retrieving data from node
+type RPCRequest struct {
+	ID      int      `json:"id"`
+	JSONRPC string   `json:"jsonrpc"`
+	Method  string   `json:"method"`
+	Params  []string `json:"params"`
+}
+
+// RPCResponse is response from rpc request
+type RPCResponse struct {
+	JSONRPC string      `json:"jsonrpc"`
+	Error   RPCError    `json:"error"`
+	ID      int         `json:"id"`
+	Result  interface{} `json:"result"`
 }
 
 // NewClient creates node client instance
@@ -36,10 +52,6 @@ type client struct {
 	RPCBaseURL     *url.URL
 }
 
-const (
-	metricsEndpoint = "/metrics"
-)
-
 // GetRPCURL returns rpc base url as string
 func (client *client) GetRPCURL() string {
 	return client.RPCBaseURL.String()
@@ -50,40 +62,39 @@ func (client *client) GetMetricsURL() string {
 	return client.MetricsBaseURL.String()
 }
 
-// GetNodeMetrics retrieves polkadot metrics from prometheus server
-func (client *client) GetMetrics() (*Metrics, error) {
-	metricsURL, _ := client.MetricsBaseURL.Parse(metricsEndpoint)
-	resp, err := http.Get(metricsURL.String())
+// SendsRPCRequest sends rpc request to node rpc url and decodes result to v
+func (client *client) sendRPCRequest(method string, params []string, v interface{}) (*http.Response, error) {
+	rpcReq := &RPCRequest{
+		ID:      1,
+		JSONRPC: "2.0",
+		Method:  method,
+		Params:  params,
+	}
+	buf := new(bytes.Buffer)
+	_ = json.NewEncoder(buf).Encode(rpcReq)
+
+	resp, err := http.Post(client.GetRPCURL(), "application/json", buf)
 	if err != nil {
-		return nil, fmt.Errorf("Metrics endpoint returned error: %v", err)
+		return nil, err
 	} else if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("Metrics endpoint returned invalid status code: %d", resp.StatusCode)
+		return nil, fmt.Errorf("Node rpc request returned invalid status code: %v", resp.StatusCode)
 	}
 
+	var rpcResponse RPCResponse
 	defer resp.Body.Close()
-	var parser expfmt.TextParser
-	metricFamilies, err := parser.TextToMetricFamilies(resp.Body)
+	body, _ := ioutil.ReadAll((resp.Body))
+	err = json.Unmarshal(body, &rpcResponse)
+
+	if err != nil {
+		return nil, err
+	} else if rpcResponse.Error != (RPCError{}) {
+		return nil, fmt.Errorf("Node rpc request returned invalid rpc: %v", rpcResponse.Error)
+	}
+
+	err = mapstructure.Decode(rpcResponse.Result, &v)
 	if err != nil {
 		return nil, err
 	}
 
-	metrics := &Metrics{
-		metricFamilies["polkadot_sync_peers"].GetMetric()[0].Gauge.Value,
-		metricFamilies["polkadot_block_height"].GetMetric()[0].Gauge.Value,
-		metricFamilies["polkadot_block_height"].GetMetric()[1].Gauge.Value,
-		metricFamilies["polkadot_ready_transactions_number"].GetMetric()[0].Gauge.Value,
-	}
-	return metrics, nil
-}
-
-// GetConfigHash returns sorted hash of supported rpc methods3
-func (client *client) GetConfigHash() (hash.Hash32, error) {
-	hash := fnv.New32()
-
-	_, err := hash.Write([]byte("TODO:hash"))
-	if err != nil {
-		return nil, err
-	}
-
-	return hash, nil
+	return resp, nil
 }
