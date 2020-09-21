@@ -128,6 +128,15 @@ func TestClient_SendRPCRequest(t *testing.T) {
 				http.Error(w, "Not Found", 404)
 			}},
 		{
+			name:    "Returns error if response not 200",
+			args:    args{"system_chain", []string{}, nil},
+			fields:  fields{http.DefaultClient, "valid"},
+			wantErr: true,
+			want:    "",
+			handleFunc: func(w http.ResponseWriter, r *http.Request) {
+				http.Error(w, "Not Found", 404)
+			}},
+		{
 			name:    "Returns error if rpc code not 200",
 			args:    args{"system_chain", []string{}, validResult},
 			fields:  fields{http.DefaultClient, "valid"},

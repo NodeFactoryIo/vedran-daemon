@@ -76,6 +76,8 @@ func (client *client) sendRPCRequest(method string, params []string, v interface
 	resp, err := http.Post(client.GetRPCURL(), "application/json", buf)
 	if err != nil {
 		return nil, err
+	} else if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("Node rpc request returned invalid status code: %v", resp.StatusCode)
 	}
 
 	var rpcResponse RPCResponse
@@ -86,7 +88,7 @@ func (client *client) sendRPCRequest(method string, params []string, v interface
 	if err != nil {
 		return nil, err
 	} else if rpcResponse.Error != (RPCError{}) {
-		return nil, fmt.Errorf("Node rpc request returned invalid status code: %v", rpcResponse.Error)
+		return nil, fmt.Errorf("Node rpc request returned invalid rpc: %v", rpcResponse.Error)
 	}
 
 	err = mapstructure.Decode(rpcResponse.Result, &v)
