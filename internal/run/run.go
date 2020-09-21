@@ -2,7 +2,6 @@ package run
 
 import (
 	"encoding/base64"
-	"log"
 	"time"
 
 	"github.com/NodeFactoryIo/vedran-daemon/internal/lb"
