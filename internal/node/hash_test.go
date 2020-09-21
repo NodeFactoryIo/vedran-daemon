@@ -62,10 +62,10 @@ func TestGetConfigHash(t *testing.T) {
 	}`
 
 	expectedHash := fnv.New32()
-	_, _ = expectedHash.Write([]byte("a_chainsystem_chain"))
-	_, _ = expectedHash.Write([]byte("ArchiveFull"))
 	_, _ = expectedHash.Write([]byte("Polkadot"))
 	_, _ = expectedHash.Write([]byte("Live"))
+	_, _ = expectedHash.Write([]byte("a_chainsystem_chain"))
+	_, _ = expectedHash.Write([]byte("ArchiveFull"))
 	_, _ = expectedHash.Write([]byte("5"))
 	_, _ = expectedHash.Write([]byte("0"))
 	_, _ = expectedHash.Write([]byte("Dot"))
