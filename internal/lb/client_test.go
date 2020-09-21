@@ -275,7 +275,7 @@ func TestClient_do(t *testing.T) {
 			}},
 		{
 			name:    "Returns error if json unmarshal fails",
-			args:    args{"/", nil},
+			args:    args{"/", testBody},
 			fields:  fields{http.DefaultClient, "valid", ""},
 			wantErr: true,
 			want:    nil,

@@ -106,11 +106,13 @@ func (c *Client) do(req *http.Request, v interface{}) (*http.Response, error) {
 		return nil, fmt.Errorf("Request %v returned invalid status code %d", req, resp.StatusCode)
 	}
 
-	defer resp.Body.Close()
-	body, _ := ioutil.ReadAll((resp.Body))
-	err = json.Unmarshal(body, &v)
-	if err != nil {
-		return nil, err
+	if v != nil {
+		defer resp.Body.Close()
+		body, _ := ioutil.ReadAll((resp.Body))
+		err = json.Unmarshal(body, &v)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return resp, nil
