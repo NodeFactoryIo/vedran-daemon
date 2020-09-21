@@ -1,11 +1,10 @@
 package telemetry
 
 import (
-	"log"
-
 	"github.com/NodeFactoryIo/vedran-daemon/internal/lb"
 	"github.com/NodeFactoryIo/vedran-daemon/internal/node"
 	"github.com/NodeFactoryIo/vedran-daemon/internal/scheduler"
+	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -28,10 +27,10 @@ type telemetry struct{}
 // StartSendingTelemetry start sending ping and metrics to load balancer and blocks current thread
 func (t *telemetry) StartSendingTelemetry(scheduler scheduler.Scheduler, lbClient *lb.Client, nodeClient node.Client) {
 	_, _ = scheduler.Every(metricsSendInterval).Seconds().Do(lbClient.Metrics.Send, nodeClient)
-	log.Println("Started sending metrics to load balancer")
+	log.Info("Started sending metrics to load balancer")
 
 	_, _ = scheduler.Every(pingSendInterval).Seconds().Do(lbClient.Ping.Send)
-	log.Println("Started sending pings to load balancer")
+	log.Info("Started sending pings to load balancer")
 
 	scheduler.StartBlocking()
 }

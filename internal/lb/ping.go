@@ -1,11 +1,11 @@
 package lb
 
 import (
-	"log"
 	"net/http"
 	"time"
 
 	"github.com/getsentry/sentry-go"
+	log "github.com/sirupsen/logrus"
 )
 
 // PingService is used for pinging load balancer to confirm daemon is alive
@@ -30,12 +30,12 @@ func (ps *pingService) Send() (*http.Response, error) {
 		Timestamp: time.Now().Unix(),
 	}
 
-	log.Println("Sending ping to load balancer")
+	log.Debug("Sending ping to load balancer")
 	req, _ := ps.client.newRequest(http.MethodPost, pingEndpoint, body)
 	resp, err := ps.client.do(req, nil)
 
 	if err != nil {
-		log.Printf("Falied sending ping to load balancer because of: %v", err)
+		log.Errorf("Failed sending ping to load balancer because of: %v", err)
 		sentry.CaptureException(err)
 		return nil, err
 	}

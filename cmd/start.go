@@ -9,10 +9,14 @@ import (
 	"github.com/NodeFactoryIo/vedran-daemon/internal/node"
 	"github.com/NodeFactoryIo/vedran-daemon/internal/run"
 	"github.com/NodeFactoryIo/vedran-daemon/internal/telemetry"
+	"github.com/NodeFactoryIo/vedran-daemon/pkg/logger"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
 var (
+	logLevel       string
+	logFile        string
 	nodeRPCURL     string
 	nodeMetricsURL string
 	id             string
@@ -27,7 +31,20 @@ var startCmd = &cobra.Command{
 	Use:   "vedran-daemon",
 	Short: "Register vedran-daemon with load balancer and start sending telemetry",
 	RunE:  start,
-	Args: func(cms *cobra.Command, args []string) error {
+	PreRunE: func(cmd *cobra.Command, args []string) error {
+		level, err := log.ParseLevel(logLevel)
+		if err != nil {
+			log.Fatalf("Invalid log level %s", logLevel)
+		}
+
+		err = logger.SetupLogger(level, logFile)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	},
+	Args: func(cmd *cobra.Command, args []string) error {
 		var err error
 		lbURL, err = url.Parse(lbBaseURL)
 		if err != nil {
@@ -54,6 +71,8 @@ func init() {
 	startCmd.Flags().StringVar(&id, "id", "", "Vedran-daemon id string (required)")
 	startCmd.Flags().StringVar(&lbBaseURL, "lb", "", "Target load balancer url (required)")
 	startCmd.Flags().StringVar(&payoutAddress, "payout-address", "", "Payout address to which reward tokens will be sent (required)")
+	startCmd.Flags().StringVar(&logLevel, "log-level", "info", "Level of logging (eg. debug, info, warn, error)")
+	startCmd.Flags().StringVar(&logFile, "log-file", "", "Path to logfile. If not set defaults to stdout")
 
 	_ = startCmd.MarkFlagRequired("id")
 	_ = startCmd.MarkFlagRequired("lb")
