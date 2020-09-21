@@ -1,6 +1,8 @@
 package run
 
 import (
+	"encoding/base64"
+	"log"
 	"time"
 
 	"github.com/NodeFactoryIo/vedran-daemon/internal/lb"
@@ -17,7 +19,7 @@ func Start(lbClient *lb.Client, nodeClient node.Client, telemetry telemetry.Tele
 		return err
 	}
 
-	err = lbClient.Register(id, nodeClient.GetRPCURL(), payoutAddress, string(configHash.Sum(nil)))
+	err = lbClient.Register(id, nodeClient.GetRPCURL(), payoutAddress, base64.StdEncoding.EncodeToString(configHash.Sum(nil)[:]))
 	if err != nil {
 		return err
 	}
