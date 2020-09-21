@@ -8,6 +8,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+
+	"github.com/mitchellh/mapstructure"
 )
 
 // Client is used to interact with polkadot node
@@ -24,6 +26,15 @@ type RPCRequest struct {
 	JSONRPC string   `json:"jsonrpc"`
 	Method  string   `json:"method"`
 	Params  []string `json:"params"`
+}
+
+// RPCResponse is response from rpc request
+type RPCResponse struct {
+	JSONRPC string      `json:"jsonrpc"`
+	Code    int         `json:"code"`
+	Message string      `json:"message"`
+	ID      int         `json:"id"`
+	Result  interface{} `json:"result"`
 }
 
 // NewClient creates node client instance
@@ -58,16 +69,22 @@ func (client *client) sendRPCRequest(method string, params []string, v interface
 	_ = json.NewEncoder(buf).Encode(rpcReq)
 
 	resp, err := http.Post(client.GetRPCURL(), "application/json", buf)
+	if err != nil {
+		return nil, err
+	}
+
+	var rpcResponse RPCResponse
+	defer resp.Body.Close()
+	body, _ := ioutil.ReadAll((resp.Body))
+	err = json.Unmarshal(body, &rpcResponse)
 
 	if err != nil {
 		return nil, err
-	} else if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("Node rpc request returned invalid status code: %d", resp.StatusCode)
+	} else if rpcResponse.Code != 0 {
+		return nil, fmt.Errorf("Node rpc request returned invalid status code: %d", rpcResponse.Code)
 	}
 
-	defer resp.Body.Close()
-	body, _ := ioutil.ReadAll((resp.Body))
-	err = json.Unmarshal(body, &v)
+	err = mapstructure.Decode(rpcResponse.Result, &v)
 	if err != nil {
 		return nil, err
 	}

@@ -23,6 +23,12 @@ func TestGetConfigHash(t *testing.T) {
 		handleFunc handleFnMock
 	}
 
+	errorStr := `{
+		"code": -32600,
+		"message": "Invalid Request",
+		"jsonrpc": "2.0",
+		"id": 1
+	}`
 	methodsResponse := `{
 		"jsonrpc": "2.0",
 			"result": {
@@ -83,7 +89,7 @@ func TestGetConfigHash(t *testing.T) {
 				_ = json.Unmarshal(body, &rpcRequest)
 
 				if rpcRequest.Method == "rpc_methods" {
-					http.Error(w, "error", 404)
+					_, _ = io.WriteString(w, errorStr)
 				}
 			}},
 		{
@@ -100,7 +106,7 @@ func TestGetConfigHash(t *testing.T) {
 				if rpcRequest.Method == "rpc_methods" {
 					_, _ = io.WriteString(w, methodsResponse)
 				} else if rpcRequest.Method == "system_nodeRoles" {
-					http.Error(w, "error", 404)
+					_, _ = io.WriteString(w, errorStr)
 				}
 			}},
 		{
@@ -119,7 +125,7 @@ func TestGetConfigHash(t *testing.T) {
 				} else if rpcRequest.Method == "system_nodeRoles" {
 					_, _ = io.WriteString(w, nodeRolesResponse)
 				} else if rpcRequest.Method == "system_chain" {
-					http.Error(w, "error", 404)
+					_, _ = io.WriteString(w, errorStr)
 				}
 			}},
 		{
@@ -140,7 +146,7 @@ func TestGetConfigHash(t *testing.T) {
 				} else if rpcRequest.Method == "system_chain" {
 					_, _ = io.WriteString(w, chainResponse)
 				} else if rpcRequest.Method == "system_chainType" {
-					http.Error(w, "error", 404)
+					_, _ = io.WriteString(w, errorStr)
 				}
 			}},
 		{
@@ -163,7 +169,7 @@ func TestGetConfigHash(t *testing.T) {
 				} else if rpcRequest.Method == "system_chainType" {
 					_, _ = io.WriteString(w, chainTypeResponse)
 				} else if rpcRequest.Method == "system_properties" {
-					http.Error(w, "error", 404)
+					_, _ = io.WriteString(w, errorStr)
 				}
 			}},
 		{

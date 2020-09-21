@@ -93,10 +93,11 @@ func TestClient_SendRPCRequest(t *testing.T) {
 	setup()
 	defer teardown()
 
-	type ExpectedResponse struct {
-		Foo string `json:"foo"`
-	}
-	var testBody = new(ExpectedResponse)
+	type InvalidResult []string
+	type ValidResult string
+
+	invalidResult := new(InvalidResult)
+	validResult := new(ValidResult)
 
 	type fields struct {
 		client  *http.Client
@@ -113,45 +114,66 @@ func TestClient_SendRPCRequest(t *testing.T) {
 		name       string
 		fields     fields
 		args       args
-		want       *ExpectedResponse
+		want       ValidResult
 		wantErr    bool
 		handleFunc handleFnMock
 	}{
-		{
-			name:    "Returns error if status code not 200",
-			args:    args{"system_chain", []string{}, nil},
-			fields:  fields{http.DefaultClient, "valid"},
-			wantErr: true,
-			want:    nil,
-			handleFunc: func(w http.ResponseWriter, r *http.Request) {
-				http.Error(w, "Not Found", 404)
-			}},
 		{
 			name:    "Returns error if server url invalid",
 			args:    args{"system_chain", []string{}, nil},
 			fields:  fields{http.DefaultClient, "invalid"},
 			wantErr: true,
-			want:    nil,
+			want:    "",
 			handleFunc: func(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, "Not Found", 404)
 			}},
 		{
-			name:    "Returns error if json unmarshal fails",
-			args:    args{"system_chain", []string{}, nil},
+			name:    "Returns error if rpc code not 200",
+			args:    args{"system_chain", []string{}, validResult},
 			fields:  fields{http.DefaultClient, "valid"},
 			wantErr: true,
-			want:    nil,
+			want:    "",
+			handleFunc: func(w http.ResponseWriter, r *http.Request) {
+				_, _ = io.WriteString(w, `{
+					"jsonrpc": "2.0",
+					"code": -32600
+					"id": 1
+				}`)
+			}},
+		{
+			name:    "Returns error if json unmarshal fails",
+			args:    args{"system_chain", []string{}, validResult},
+			fields:  fields{http.DefaultClient, "valid"},
+			wantErr: true,
+			want:    "",
 			handleFunc: func(w http.ResponseWriter, r *http.Request) {
 				_, _ = io.WriteString(w, `invalid`)
 			}},
 		{
+			name:    "Returns error if map structure decode fails",
+			args:    args{"system_chain", []string{}, invalidResult},
+			fields:  fields{http.DefaultClient, "valid"},
+			wantErr: true,
+			want:    "",
+			handleFunc: func(w http.ResponseWriter, r *http.Request) {
+				_, _ = io.WriteString(w, `{
+					"jsonrpc": "2.0",
+					"result": "Live",
+					"id": 1
+				}`)
+			}},
+		{
 			name:    "Returns resp if request valid",
-			args:    args{"system_chain", []string{}, testBody},
+			args:    args{"system_chain", []string{}, validResult},
 			fields:  fields{http.DefaultClient, "valid"},
 			wantErr: false,
-			want:    &ExpectedResponse{Foo: "bar"},
+			want:    "Live",
 			handleFunc: func(w http.ResponseWriter, r *http.Request) {
-				_, _ = io.WriteString(w, `{"foo": "bar"}`)
+				_, _ = io.WriteString(w, `{
+					"jsonrpc": "2.0",
+					"result": "Live",
+					"id": 1
+				}`)
 			}},
 	}
 
@@ -176,8 +198,10 @@ func TestClient_SendRPCRequest(t *testing.T) {
 			}
 
 			if got != nil {
-				if !reflect.DeepEqual(testBody, tt.want) {
-					t.Errorf("Client.SendRPCRequest() = %v, want %v", testBody, tt.want)
+				var result = new(ValidResult)
+				result = &tt.want
+				if !reflect.DeepEqual(validResult, result) {
+					t.Errorf("Client.SendRPCRequest() = %v, want %v", validResult, tt.want)
 				}
 			}
 		})
