@@ -1,7 +1,6 @@
 package lb
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 
@@ -36,7 +35,7 @@ func (ps *pingService) Send() (*http.Response, error) {
 	resp, err := ps.client.do(req, nil)
 
 	if err != nil {
-		log.Error(fmt.Sprintf("Failed sending ping to load balancer because of: %v", err))
+		log.Errorf("Failed sending ping to load balancer because of: %v", err)
 		sentry.CaptureException(err)
 		return nil, err
 	}
