@@ -30,7 +30,7 @@ func (ps *pingService) Send() (*http.Response, error) {
 		Timestamp: time.Now().Unix(),
 	}
 
-	log.Info("Sending ping to load balancer")
+	log.Debug("Sending ping to load balancer")
 	req, _ := ps.client.newRequest(http.MethodPost, pingEndpoint, body)
 	resp, err := ps.client.do(req, nil)
 

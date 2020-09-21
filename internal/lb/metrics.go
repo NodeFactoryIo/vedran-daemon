@@ -29,7 +29,7 @@ func (ms *metricsService) Send(client node.Client) (*http.Response, error) {
 		return nil, err
 	}
 
-	log.Infof("Sending metrics to load balancer: %+v", metrics)
+	log.Debugf("Sending metrics to load balancer: %+v", metrics)
 	req, _ := ms.client.newRequest(http.MethodPut, metricsEndpoint, metrics)
 	resp, err := ms.client.do(req, nil)
 

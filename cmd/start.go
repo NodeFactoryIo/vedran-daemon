@@ -71,7 +71,7 @@ func init() {
 	startCmd.Flags().StringVar(&id, "id", "", "Vedran-daemon id string (required)")
 	startCmd.Flags().StringVar(&lbBaseURL, "lb", "", "Target load balancer url (required)")
 	startCmd.Flags().StringVar(&payoutAddress, "payout-address", "", "Payout address to which reward tokens will be sent (required)")
-	startCmd.Flags().StringVar(&logLevel, "log-level", "error", "Level of logging (eg. info, warn ,error)")
+	startCmd.Flags().StringVar(&logLevel, "log-level", "info", "Level of logging (eg. debug, info, warn, error)")
 	startCmd.Flags().StringVar(&logFile, "log-file", "", "Path to logfile. If not set defaults to stdout")
 
 	_ = startCmd.MarkFlagRequired("id")
