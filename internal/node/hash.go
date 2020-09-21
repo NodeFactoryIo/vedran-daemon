@@ -8,6 +8,11 @@ import (
 	"strings"
 )
 
+type JSONRPCResponse struct {
+	JSONRPC string `json:"jsonrpc"`
+	ID      int    `json:"id"`
+}
+
 // MethodsResult contains all available rpc methods of node
 type MethodsResult struct {
 	Version int      `json:"version"`
@@ -16,30 +21,26 @@ type MethodsResult struct {
 
 // RPCMethodsResponse is rpc response od rpc_methods call
 type RPCMethodsResponse struct {
-	JSONRPC string        `json:"jsonrpc"`
-	Result  MethodsResult `json:"result"`
-	ID      int           `json:"id"`
+	JSONRPCResponse
+	Result MethodsResult `json:"result"`
 }
 
 // RPCChainTypeResponse is rpc response of system_chainType call
 type RPCChainTypeResponse struct {
-	JSONRPC string `json:"jsonrpc"`
-	Result  string `json:"result"`
-	ID      int    `json:"id"`
+	JSONRPCResponse
+	Result string `json:"result"`
 }
 
 // RPCChainResponse is rpc response of system_chain call
 type RPCChainResponse struct {
-	JSONRPC string `json:"jsonrpc"`
-	Result  string `json:"result"`
-	ID      int    `json:"id"`
+	JSONRPCResponse
+	Result string `json:"result"`
 }
 
 // RPCNodeRolesResponse is rpc response of system_nodeRoles call
 type RPCNodeRolesResponse struct {
-	JSONRPC string   `json:"jsonrpc"`
-	Result  []string `json:"result"`
-	ID      int      `json:"id"`
+	JSONRPCResponse
+	Result []string `json:"result"`
 }
 
 // Properties are node properties
@@ -51,9 +52,8 @@ type Properties struct {
 
 // RPCPropertiesResponse is rpc response of system_properties call
 type RPCPropertiesResponse struct {
-	JSONRPC string     `json:"jsonrpc"`
-	Result  Properties `json:"result"`
-	ID      int        `json:"id"`
+	JSONRPCResponse
+	Result Properties `json:"result"`
 }
 
 // GetConfigHash hashes sorted node configuration
