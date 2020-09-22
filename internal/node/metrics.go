@@ -16,7 +16,7 @@ type Metrics struct {
 	PeerCount             *float64 `json:"peer_count"`
 	BestBlockHeight       *float64 `json:"best_block_height"`
 	FinalizedBlockHeight  *float64 `json:"finalized_block_height"`
-	ReadyTransactionCount *float64 `json:"read_transaction_count"`
+	ReadyTransactionCount *float64 `json:"ready_transaction_count"`
 }
 
 // GetNodeMetrics retrieves polkadot metrics from prometheus server
