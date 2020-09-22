@@ -1,5 +1,16 @@
 # Changelog
 
+## [v0.1.1](https://github.com/NodeFactoryIo/vedran-daemon/tree/v0.1.1)
+
+[Full Changelog](https://github.com/NodeFactoryIo/vedran-daemon/compare/v0.1.0...v0.1.1)
+
+### Fixed
+- Fix ReadyTransactionCount json field [\#27](https://github.com/NodeFactoryIo/vedran-daemon/pull/27) ([mpetrun5](https://github.com/mpetrun5))
+
+### Added
+
+### Changed
+
 ## [v0.1.0](https://github.com/NodeFactoryIo/vedran-daemon/tree/v.0.1.0)
 
 [Full Changelog](https://github.com/NodeFactoryIo/vedran-daemon/compare/00a487dbbbd8e201b1354080e88302e0db4130f0...v.0.1.0)
