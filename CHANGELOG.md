@@ -1,5 +1,16 @@
 # Changelog
 
+## [unreleased](https://github.com/NodeFactoryIo/vedran-daemon/tree/HEAD)
+
+[Full Changelog](https://github.com/NodeFactoryIo/vedran-daemon/compare/v0.1.1...v0.1.2)
+
+### Fixed
+- Retry config hash retrieval on fail [\#30](https://github.com/NodeFactoryIo/vedran-daemon/pull/30) ([mpetrun5](https://github.com/mpetrun5))
+
+### Added
+
+### Changed
+
 ## [v0.1.1](https://github.com/NodeFactoryIo/vedran-daemon/tree/v0.1.1)
 
 [Full Changelog](https://github.com/NodeFactoryIo/vedran-daemon/compare/v0.1.0...v0.1.1)
