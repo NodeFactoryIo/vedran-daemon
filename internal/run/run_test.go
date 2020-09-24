@@ -9,6 +9,7 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"testing"
+	"time"
 
 	"github.com/NodeFactoryIo/vedran-daemon/internal/lb"
 	nodeMocks "github.com/NodeFactoryIo/vedran-daemon/mocks/node"
@@ -33,6 +34,8 @@ func teardown() {
 }
 
 func TestStart(t *testing.T) {
+	sleep = func(d time.Duration) {}
+
 	setup()
 	defer teardown()
 
@@ -40,6 +43,7 @@ func TestStart(t *testing.T) {
 	lbClient := lb.NewClient(lbURL)
 	nodeClient := &nodeMocks.Client{}
 	testHash := fnv.New32()
+	testHash.Write([]byte("Test"))
 
 	type args struct {
 		client        *lb.Client
@@ -53,27 +57,22 @@ func TestStart(t *testing.T) {
 		wantErr                     bool
 		handleFunc                  handleFnMock
 		startSendingTelemetryResult error
-		getConfigHashResult         hash.Hash32
-		getConfigHashError          error
+		firstGetConfigHashResult    hash.Hash32
+		firstGetConfigHashError     error
+		secondGetConfigHashResult   hash.Hash32
+		secondGetConfigHashError    error
 	}{
 		{
-			name:    "Returns error if get config hash fails",
+			name:    "Retries get config hash if get config hash fails and returns error if register fails",
 			args:    args{lbClient, "test-id", "0xtestpayoutaddress"},
 			wantErr: true,
 			handleFunc: func(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, "Not Found", 404)
 			},
-			getConfigHashError:  fmt.Errorf("Error"),
-			getConfigHashResult: nil},
-		{
-			name:    "Returns error if lb register fails",
-			args:    args{lbClient, "test-id", "0xtestpayoutaddress"},
-			wantErr: true,
-			handleFunc: func(w http.ResponseWriter, r *http.Request) {
-				http.Error(w, "Not Found", 404)
-			},
-			getConfigHashError:  nil,
-			getConfigHashResult: testHash},
+			firstGetConfigHashError:   fmt.Errorf("Error"),
+			firstGetConfigHashResult:  nil,
+			secondGetConfigHashError:  nil,
+			secondGetConfigHashResult: testHash},
 		{
 			name:    "Returns nil if startSendingTelemetry succeeds",
 			args:    args{lbClient, "test-id", "0xtestpayoutaddress"},
@@ -81,18 +80,22 @@ func TestStart(t *testing.T) {
 			handleFunc: func(w http.ResponseWriter, r *http.Request) {
 				_, _ = io.WriteString(w, `{"token": "test-token"}`)
 			},
-			getConfigHashError:  nil,
-			getConfigHashResult: testHash},
+			firstGetConfigHashError:  nil,
+			firstGetConfigHashResult: testHash},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			setup()
+			testHash = fnv.New32()
+			testHash.Write([]byte("Test"))
 
 			telemetryMock := &telemetryMocks.Telemetry{}
 			telemetryMock.On("StartSendingTelemetry", mock.Anything, mock.Anything, mock.Anything).Return()
 			nodeClient.On("GetRPCURL").Return("http://localhost:9933")
-			nodeClient.On("GetConfigHash").Once().Return(tt.getConfigHashResult, tt.getConfigHashError)
+			nodeClient.On("GetConfigHash").Once().Return(tt.firstGetConfigHashResult, tt.firstGetConfigHashError)
+			nodeClient.On("GetConfigHash").Once().Return(tt.secondGetConfigHashResult, tt.secondGetConfigHashError)
+
 			url, _ := url.Parse(server.URL)
 			lbClient.BaseURL = url
 			mux.HandleFunc("/api/v1/nodes", tt.handleFunc)
