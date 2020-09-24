@@ -2,6 +2,7 @@ package run
 
 import (
 	"encoding/base64"
+	"hash"
 	"time"
 
 	"github.com/NodeFactoryIo/vedran-daemon/internal/lb"
@@ -11,14 +12,23 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+var sleep = time.Sleep
+
 // Start registers to load balancer and starts sending telemetry
 func Start(lbClient *lb.Client, nodeClient node.Client, telemetry telemetry.Telemetry, id string, payoutAddress string) error {
-	configHash, err := nodeClient.GetConfigHash()
-	if err != nil {
-		return err
+	var configHash hash.Hash32
+	for {
+		var err error
+		configHash, err = nodeClient.GetConfigHash()
+		if err == nil {
+			break
+		}
+
+		log.Errorf("Failed retrieving node metrics because of %v. Retrying in 5 seconds...", err)
+		sleep(time.Second * 5)
 	}
 
-	err = lbClient.Register(id, nodeClient.GetRPCURL(), payoutAddress, base64.StdEncoding.EncodeToString(configHash.Sum(nil)[:]))
+	err := lbClient.Register(id, nodeClient.GetRPCURL(), payoutAddress, base64.StdEncoding.EncodeToString(configHash.Sum(nil)[:]))
 	if err != nil {
 		return err
 	}
