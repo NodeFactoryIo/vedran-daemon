@@ -13,7 +13,6 @@ import (
 )
 
 var sleep = time.Sleep
-var test = "32"
 
 // Start registers to load balancer and starts sending telemetry
 func Start(lbClient *lb.Client, nodeClient node.Client, telemetry telemetry.Telemetry, id string, payoutAddress string) error {

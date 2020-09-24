@@ -43,7 +43,6 @@ func TestStart(t *testing.T) {
 	lbClient := lb.NewClient(lbURL)
 	nodeClient := &nodeMocks.Client{}
 	testHash := fnv.New32()
-	testHash.Write([]byte("Test"))
 
 	type args struct {
 		client        *lb.Client
@@ -87,8 +86,6 @@ func TestStart(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			setup()
-			testHash = fnv.New32()
-			testHash.Write([]byte("Test"))
 
 			telemetryMock := &telemetryMocks.Telemetry{}
 			telemetryMock.On("StartSendingTelemetry", mock.Anything, mock.Anything, mock.Anything).Return()
