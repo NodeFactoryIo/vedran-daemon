@@ -80,6 +80,8 @@ func init() {
 }
 
 func start(cmd *cobra.Command, _ []string) error {
+	DisplayBanner()
+
 	lbClient := lb.NewClient(lbURL)
 	nodeClient := node.NewClient(rpcURL, metricsURL)
 	telemetry := telemetry.NewTelemetry()
