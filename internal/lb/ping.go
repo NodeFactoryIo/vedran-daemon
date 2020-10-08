@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/getsentry/sentry-go"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -36,7 +35,6 @@ func (ps *pingService) Send() (*http.Response, error) {
 
 	if err != nil {
 		log.Errorf("Failed sending ping to load balancer because of: %v", err)
-		sentry.CaptureException(err)
 		return nil, err
 	}
 
