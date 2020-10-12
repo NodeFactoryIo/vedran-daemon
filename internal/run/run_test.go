@@ -14,6 +14,7 @@ import (
 	"github.com/NodeFactoryIo/vedran-daemon/internal/lb"
 	nodeMocks "github.com/NodeFactoryIo/vedran-daemon/mocks/node"
 	telemetryMocks "github.com/NodeFactoryIo/vedran-daemon/mocks/telemetry"
+	tunnelMocks "github.com/NodeFactoryIo/vedran-daemon/mocks/tunnel"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -60,6 +61,7 @@ func TestStart(t *testing.T) {
 		firstGetConfigHashError     error
 		secondGetConfigHashResult   hash.Hash32
 		secondGetConfigHashError    error
+		startTunnelCallCount        int
 	}{
 		{
 			name:    "Retries get config hash if get config hash fails and returns error if register fails",
@@ -71,7 +73,8 @@ func TestStart(t *testing.T) {
 			firstGetConfigHashError:   fmt.Errorf("Error"),
 			firstGetConfigHashResult:  nil,
 			secondGetConfigHashError:  nil,
-			secondGetConfigHashResult: testHash},
+			secondGetConfigHashResult: testHash,
+			startTunnelCallCount:      0},
 		{
 			name:    "Returns nil if startSendingTelemetry succeeds",
 			args:    args{lbClient, "test-id", "0xtestpayoutaddress"},
@@ -80,7 +83,8 @@ func TestStart(t *testing.T) {
 				_, _ = io.WriteString(w, `{"token": "test-token"}`)
 			},
 			firstGetConfigHashError:  nil,
-			firstGetConfigHashResult: testHash},
+			firstGetConfigHashResult: testHash,
+			startTunnelCallCount:     1},
 	}
 
 	for _, tt := range tests {
@@ -89,6 +93,8 @@ func TestStart(t *testing.T) {
 
 			telemetryMock := &telemetryMocks.Telemetry{}
 			telemetryMock.On("StartSendingTelemetry", mock.Anything, mock.Anything, mock.Anything).Return()
+			tunnelMock := &tunnelMocks.Tunneler{}
+			tunnelMock.On("Start", mock.Anything, mock.Anything).Return()
 			nodeClient.On("GetRPCURL").Return("http://localhost:9933")
 			nodeClient.On("GetConfigHash").Once().Return(tt.firstGetConfigHashResult, tt.firstGetConfigHashError)
 			nodeClient.On("GetConfigHash").Once().Return(tt.secondGetConfigHashResult, tt.secondGetConfigHashError)
@@ -97,7 +103,7 @@ func TestStart(t *testing.T) {
 			lbClient.BaseURL = url
 			mux.HandleFunc("/api/v1/nodes", tt.handleFunc)
 
-			err := Start(tt.args.client, nodeClient, telemetryMock, tt.args.id, tt.args.payoutAddress)
+			err := Start(tunnelMock, tt.args.client, nodeClient, telemetryMock, tt.args.id, tt.args.payoutAddress)
 
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Start() error = %v, wantErr %v", err, tt.wantErr)
