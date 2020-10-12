@@ -30,15 +30,6 @@ var (
 	rpcURL         *url.URL
 )
 
-// Tunnel defines a tunnel.
-type Tunnel struct {
-	Protocol   string `yaml:"proto,omitempty"`
-	Addr       string `yaml:"addr,omitempty"`
-	Auth       string `yaml:"auth,omitempty"`
-	Host       string `yaml:"host,omitempty"`
-	RemoteAddr string `yaml:"remote_addr,omitempty"`
-}
-
 var startCmd = &cobra.Command{
 	Use:   "vedran-daemon",
 	Short: "Register vedran-daemon with load balancer and start sending telemetry",
