@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"crypto/tls"
 	"fmt"
 	"net/url"
 	"os"
@@ -11,8 +10,6 @@ import (
 	"github.com/NodeFactoryIo/vedran-daemon/internal/run"
 	"github.com/NodeFactoryIo/vedran-daemon/internal/telemetry"
 	"github.com/NodeFactoryIo/vedran-daemon/pkg/logger"
-	tunnel "github.com/mmatczuk/go-http-tunnel"
-	"github.com/mmatczuk/go-http-tunnel/proto"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -98,7 +95,7 @@ func start(cmd *cobra.Command, _ []string) error {
 	nodeClient := node.NewClient(rpcURL, metricsURL)
 	telemetry := telemetry.NewTelemetry()
 
-	err = run.Start(lbClient, nodeClient, telemetry, id, payoutAddress)
+	err := run.Start(lbClient, nodeClient, telemetry, id, payoutAddress)
 	if err != nil {
 		return fmt.Errorf("Failed starting vedran daemon because: %v", err)
 	}
@@ -112,50 +109,4 @@ func Execute() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-}
-
-func proxy(m map[string]*Tunnel) tunnel.ProxyFunc {
-	httpURL := make(map[string]*url.URL)
-	tcpAddr := make(map[string]string)
-
-	for _, t := range m {
-		switch t.Protocol {
-		case proto.HTTP:
-			u, err := url.Parse(t.Addr)
-			if err != nil {
-				log.Fatalf("invalid tunnel address: %s", err)
-			}
-			httpURL[t.Host] = u
-		case proto.TCP, proto.TCP4, proto.TCP6:
-			tcpAddr[t.RemoteAddr] = t.Addr
-		case proto.SNI:
-			tcpAddr[t.Host] = t.Addr
-		}
-	}
-
-	return tunnel.Proxy(tunnel.ProxyFuncs{
-		HTTP: tunnel.NewMultiHTTPProxy(httpURL, nil).Proxy,
-		TCP:  tunnel.NewMultiTCPProxy(tcpAddr, nil).Proxy,
-	})
-}
-
-func tlsConfig(tlsCert string, tlsKey string, serverAddr string) (*tls.Config, error) {
-	cert, err := tls.LoadX509KeyPair(tlsCert, tlsKey)
-	if err != nil {
-		return nil, err
-	}
-
-	/*
-		host, _, err := net.SplitHostPort(serverAddr)
-		if err != nil {
-			return nil, err
-		}
-	*/
-
-	return &tls.Config{
-		ServerName:         "127.0.0.1:5223",
-		Certificates:       []tls.Certificate{cert},
-		InsecureSkipVerify: true,
-		RootCAs:            nil,
-	}, nil
 }
