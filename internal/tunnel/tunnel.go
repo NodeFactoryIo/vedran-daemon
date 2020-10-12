@@ -41,7 +41,7 @@ func (t *Tunnel) StartTunnel(nodeID string, token string) {
 		AuthToken: token,
 	})
 	if err != nil {
-		log.Fatalf("Failed to connect to tunnel: ", err)
+		log.Fatal("Failed to connect to tunnel: ", err)
 	}
 
 	err = c.Start()
