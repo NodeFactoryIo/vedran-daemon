@@ -94,7 +94,7 @@ func TestStart(t *testing.T) {
 			telemetryMock := &telemetryMocks.Telemetry{}
 			telemetryMock.On("StartSendingTelemetry", mock.Anything, mock.Anything, mock.Anything).Return()
 			tunnelMock := &tunnelMocks.Tunneler{}
-			tunnelMock.On("StartTunnel", mock.Anything, mock.Anything, mock.Anything).Return()
+			tunnelMock.On("StartTunnel", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return()
 			nodeClient.On("GetRPCURL").Return("http://localhost:9933")
 			nodeClient.On("GetConfigHash").Once().Return(tt.firstGetConfigHashResult, tt.firstGetConfigHashError)
 			nodeClient.On("GetConfigHash").Once().Return(tt.secondGetConfigHashResult, tt.secondGetConfigHashError)
