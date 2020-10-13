@@ -18,18 +18,17 @@ const (
 )
 
 type Tunnel struct {
-	TunnelURL  *url.URL
 	NodeRPCURL *url.URL
 }
 
 type Tunneler interface {
 	// StartTunnel connects to load balancer tunnel port and creates connection
-	StartTunnel(nodeID string, token string)
+	StartTunnel(nodeID string, tunnelURL string, token string)
 }
 
-func (t *Tunnel) StartTunnel(nodeID string, token string) {
+func (t *Tunnel) StartTunnel(nodeID string, tunnelURL string, token string) {
 	c, err := client.NewClient(&client.ClientConfig{
-		ServerAddress: t.TunnelURL.Host,
+		ServerAddress: tunnelURL,
 		Tunnels: map[string]*client.Tunnel{
 			"default": {
 				Protocol:   Protocol,

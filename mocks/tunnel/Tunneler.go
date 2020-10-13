@@ -9,7 +9,7 @@ type Tunneler struct {
 	mock.Mock
 }
 
-// StartTunnel provides a mock function with given fields: nodeID, token
-func (_m *Tunneler) StartTunnel(nodeID string, token string) {
-	_m.Called(nodeID, token)
+// StartTunnel provides a mock function with given fields: nodeID, tunnelURL, token
+func (_m *Tunneler) StartTunnel(nodeID string, tunnelURL string, token string) {
+	_m.Called(nodeID, tunnelURL, token)
 }

@@ -80,7 +80,7 @@ func TestStart(t *testing.T) {
 			args:    args{lbClient, "test-id", "0xtestpayoutaddress"},
 			wantErr: false,
 			handleFunc: func(w http.ResponseWriter, r *http.Request) {
-				_, _ = io.WriteString(w, `{"token": "test-token"}`)
+				_, _ = io.WriteString(w, `{"token": "test-token", "tunnel_url": "url:5223"}`)
 			},
 			firstGetConfigHashError:  nil,
 			firstGetConfigHashResult: testHash,
@@ -94,7 +94,7 @@ func TestStart(t *testing.T) {
 			telemetryMock := &telemetryMocks.Telemetry{}
 			telemetryMock.On("StartSendingTelemetry", mock.Anything, mock.Anything, mock.Anything).Return()
 			tunnelMock := &tunnelMocks.Tunneler{}
-			tunnelMock.On("StartTunnel", mock.Anything, mock.Anything).Return()
+			tunnelMock.On("StartTunnel", mock.Anything, mock.Anything, mock.Anything).Return()
 			nodeClient.On("GetRPCURL").Return("http://localhost:9933")
 			nodeClient.On("GetConfigHash").Once().Return(tt.firstGetConfigHashResult, tt.firstGetConfigHashError)
 			nodeClient.On("GetConfigHash").Once().Return(tt.secondGetConfigHashResult, tt.secondGetConfigHashError)
