@@ -18,7 +18,6 @@ const (
 type RegisterRequest struct {
 	ID            string `json:"id"`
 	ConfigHash    string `json:"config_hash"`
-	NodeURL       string `json:"node_url"`
 	PayoutAddress string `json:"payout_address"`
 }
 
@@ -50,10 +49,9 @@ func NewClient(baseURL *url.URL) *Client {
 }
 
 // Register daemon with load balancer and store token in client
-func (c *Client) Register(id string, nodeURL string, payoutAddress string, configHash string) (*RegisterResponse, error) {
+func (c *Client) Register(id string, payoutAddress string, configHash string) (*RegisterResponse, error) {
 	body := &RegisterRequest{
 		ID:            id,
-		NodeURL:       nodeURL,
 		PayoutAddress: payoutAddress,
 		ConfigHash:    configHash,
 	}

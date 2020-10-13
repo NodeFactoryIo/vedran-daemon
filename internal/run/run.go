@@ -29,7 +29,7 @@ func Start(tunnel tunnel.Tunneler, lbClient *lb.Client, nodeClient node.Client, 
 		sleep(time.Second * 5)
 	}
 
-	registerResponse, err := lbClient.Register(id, nodeClient.GetRPCURL(), payoutAddress, base64.StdEncoding.EncodeToString(configHash.Sum(nil)[:]))
+	registerResponse, err := lbClient.Register(id, payoutAddress, base64.StdEncoding.EncodeToString(configHash.Sum(nil)[:]))
 	if err != nil {
 		return err
 	}
