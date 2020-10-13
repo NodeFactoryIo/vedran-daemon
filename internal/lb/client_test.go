@@ -100,7 +100,7 @@ func TestClient_Register(t *testing.T) {
 			wantErr: false,
 			want:    "test-token",
 			handleFunc: func(w http.ResponseWriter, r *http.Request) {
-				_, _ = io.WriteString(w, `{"token": "test-token"}`)
+				_, _ = io.WriteString(w, `{"token": "test-token", "tunnel_url": "192.168.1.31:5223"}`)
 			}},
 	}
 	for _, tt := range tests {
@@ -120,16 +120,15 @@ func TestClient_Register(t *testing.T) {
 			}
 			mux.HandleFunc("/api/v1/nodes", tt.handleFunc)
 
-			err := c.Register(tt.args.id, tt.args.nodeURL, tt.args.payoutAddress, tt.args.configHash)
+			registerResponse, err := c.Register(tt.args.id, tt.args.nodeURL, tt.args.payoutAddress, tt.args.configHash)
 
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Client.Register() error = %v, wantErr %v", err, tt.wantErr)
 			}
 
-			if tt.want != c.Token {
+			if tt.want != c.Token && "192.168.1.31:5223" != registerResponse.TunnelURL {
 				t.Errorf("Client.Register() token = %s, want %s", c.Token, tt.want)
 			}
-
 		})
 
 		teardown()
