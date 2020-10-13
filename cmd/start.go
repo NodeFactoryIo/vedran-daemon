@@ -22,9 +22,7 @@ var (
 	nodeMetricsURL string
 	id             string
 	lbBaseURL      string
-	lbTunnelURL    string
 	payoutAddress  string
-	lbTURL         *url.URL
 	lbURL          *url.URL
 	metricsURL     *url.URL
 	rpcURL         *url.URL
@@ -54,11 +52,6 @@ var startCmd = &cobra.Command{
 			return fmt.Errorf("Failed parsing load balancer url: %v", err)
 		}
 
-		lbTURL, err = url.Parse(lbTunnelURL)
-		if err != nil {
-			return fmt.Errorf("Failed parsing load balancer tunnel url: %v", err)
-		}
-
 		metricsURL, err = url.Parse(nodeMetricsURL)
 		if err != nil {
 			return fmt.Errorf("Failed parsing metrics url: %v", err)
@@ -78,14 +71,12 @@ func init() {
 	startCmd.Flags().StringVar(&nodeMetricsURL, "node-metrics", "http://localhost:9615", "Polkadot node metrics url")
 	startCmd.Flags().StringVar(&id, "id", "", "Vedran-daemon id string (required)")
 	startCmd.Flags().StringVar(&lbBaseURL, "lb", "", "Target load balancer url (required)")
-	startCmd.Flags().StringVar(&lbTunnelURL, "lb-tunnel", "", "Target load balancer tunnel url (required)")
 	startCmd.Flags().StringVar(&payoutAddress, "payout-address", "", "Payout address to which reward tokens will be sent (required)")
 	startCmd.Flags().StringVar(&logLevel, "log-level", "info", "Level of logging (eg. debug, info, warn, error)")
 	startCmd.Flags().StringVar(&logFile, "log-file", "", "Path to logfile. If not set defaults to stdout")
 
 	_ = startCmd.MarkFlagRequired("id")
 	_ = startCmd.MarkFlagRequired("lb")
-	_ = startCmd.MarkFlagRequired("lb-tunnel")
 	_ = startCmd.MarkFlagRequired("payout-address")
 }
 
@@ -96,7 +87,6 @@ func start(cmd *cobra.Command, _ []string) error {
 	nodeClient := node.NewClient(rpcURL, metricsURL)
 	telemetry := telemetry.NewTelemetry()
 	tunnel := &tunnel.Tunnel{
-		TunnelURL:  lbTURL,
 		NodeRPCURL: rpcURL,
 	}
 
