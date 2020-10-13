@@ -2,6 +2,7 @@ package tunnel
 
 import (
 	"net/url"
+	"strconv"
 	"time"
 
 	"github.com/NodeFactoryIo/vedran/pkg/http-tunnel/client"
@@ -14,7 +15,6 @@ const (
 	DefaultBackoffMaxInterval = 60 * time.Second
 	DefaultBackoffMaxTime     = 15 * time.Minute
 	Protocol                  = "tcp"
-	RemoteAddr                = "0.0.0.0:AUTO"
 )
 
 type Tunnel struct {
@@ -23,17 +23,17 @@ type Tunnel struct {
 
 type Tunneler interface {
 	// StartTunnel connects to load balancer tunnel port and creates connection
-	StartTunnel(nodeID string, tunnelURL string, token string)
+	StartTunnel(nodeID string, tunnelURL string, token string, port int)
 }
 
-func (t *Tunnel) StartTunnel(nodeID string, tunnelURL string, token string) {
+func (t *Tunnel) StartTunnel(nodeID string, tunnelURL string, token string, port int) {
 	c, err := client.NewClient(&client.ClientConfig{
 		ServerAddress: tunnelURL,
 		Tunnels: map[string]*client.Tunnel{
 			"default": {
 				Protocol:   Protocol,
 				Addr:       t.NodeRPCURL.Host,
-				RemoteAddr: RemoteAddr,
+				RemoteAddr: "0.0.0.0:" + strconv.Itoa(port),
 			},
 		},
 		Logger:    log.NewEntry(log.New()),
