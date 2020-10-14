@@ -1,5 +1,15 @@
 # Changelog
 
+## [unreleased](https://github.com/NodeFactoryIo/vedran-daemon/tree/HEAD)
+
+[Full Changelog](https://github.com/NodeFactoryIo/vedran-daemon/compare/v0.1.2...HEAD)
+
+### Fixed
+
+### Added
+
+### Changed
+
 ## [v0.1.2](https://github.com/NodeFactoryIo/vedran-daemon/tree/v0.1.2)
 
 [Full Changelog](https://github.com/NodeFactoryIo/vedran-daemon/compare/v0.1.1...v0.1.2)
