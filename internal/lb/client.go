@@ -25,7 +25,6 @@ type RegisterRequest struct {
 type RegisterResponse struct {
 	Token     string `json:"token"`
 	TunnelURL string `json:"tunnel_url"`
-	Port      int    `json:"port"`
 }
 
 // Client used to communicate with vedran load balancer

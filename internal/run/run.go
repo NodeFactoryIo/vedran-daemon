@@ -35,7 +35,7 @@ func Start(tunnel tunnel.Tunneler, lbClient *lb.Client, nodeClient node.Client, 
 	}
 	log.Infof("Registered to load balancer %s", lbClient.BaseURL.String())
 
-	go tunnel.StartTunnel(id, registerResponse.TunnelURL, registerResponse.Token, registerResponse.Port)
+	go tunnel.StartTunnel(id, registerResponse.TunnelURL, registerResponse.Token)
 
 	scheduler := gocron.NewScheduler(time.UTC)
 	telemetry.StartSendingTelemetry(scheduler, lbClient, nodeClient)
