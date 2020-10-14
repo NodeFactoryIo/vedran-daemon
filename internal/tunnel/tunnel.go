@@ -27,7 +27,7 @@ type Tunneler interface {
 
 func (t *Tunnel) StartTunnel(nodeID string, tunnelServerAddress string, token string) {
 	c, err := client.NewClient(&client.ClientConfig{
-		ServerAddress: tunnelServerAddress,
+		ServerAddress: "127.0.0.1:5223",
 		Tunnels: map[string]*client.Tunnel{
 			"default": {
 				Protocol:   Protocol,
@@ -37,6 +37,7 @@ func (t *Tunnel) StartTunnel(nodeID string, tunnelServerAddress string, token st
 		},
 		Logger:    log.NewEntry(log.New()),
 		AuthToken: token,
+		IdName:    nodeID,
 	})
 	if err != nil {
 		log.Fatal("Failed to connect to tunnel: ", err)
