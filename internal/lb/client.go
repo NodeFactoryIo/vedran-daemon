@@ -23,8 +23,8 @@ type RegisterRequest struct {
 
 // RegisterResponse from lb register endpoint
 type RegisterResponse struct {
-	Token     string `json:"token"`
-	TunnelURL string `json:"tunnel_url"`
+	Token               string `json:"token"`
+	TunnelServerAddress string `json:"tunnel_server_address"`
 }
 
 // Client used to communicate with vedran load balancer
