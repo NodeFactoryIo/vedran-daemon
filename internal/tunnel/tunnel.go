@@ -27,7 +27,7 @@ type Tunneler interface {
 
 func (t *Tunnel) StartTunnel(nodeID string, tunnelServerAddress string, token string) {
 	c, err := client.NewClient(&client.ClientConfig{
-		ServerAddress: "127.0.0.1:5223",
+		ServerAddress: tunnelServerAddress,
 		Tunnels: map[string]*client.Tunnel{
 			"default": {
 				Protocol:   Protocol,
