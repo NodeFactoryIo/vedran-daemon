@@ -17,12 +17,17 @@ const (
 	RemoteAddr                = "0.0.0.0:AUTO"
 )
 
+// Tunnel is tunnel connection with load balancer
 type Tunnel struct {
 	NodeRPCURL *url.URL
 }
 
+// Tunneler defines methods for connecting to load balancer tunnel
 type Tunneler interface {
-	// StartTunnel connects to load balancer tunnel port and creates connection
+	// StartTunnel connects to load balancer tunnel port and creates connection.
+	// nodeID is id that is passed in daemon,
+	// tunnelServerAddress is public address of load balancer tunnel server and
+	// token is jwt token given when registering with load balancer.
 	StartTunnel(nodeID string, tunnelServerAddress string, token string)
 }
 
