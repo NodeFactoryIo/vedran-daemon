@@ -125,7 +125,7 @@ func TestClient_Register(t *testing.T) {
 				t.Errorf("Client.Register() error = %v, wantErr %v", err, tt.wantErr)
 			}
 
-			if tt.want != c.Token && "192.168.1.31:5223" != registerResponse.TunnelURL {
+			if tt.want != c.Token || tt.want != registerResponse.Token {
 				t.Errorf("Client.Register() token = %s, want %s", c.Token, tt.want)
 			}
 		})

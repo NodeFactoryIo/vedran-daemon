@@ -14,6 +14,7 @@ const (
 	DefaultBackoffMaxInterval = 60 * time.Second
 	DefaultBackoffMaxTime     = 15 * time.Minute
 	Protocol                  = "tcp"
+	RemoteAddr                = "0.0.0.0:AUTO"
 )
 
 type Tunnel struct {
@@ -32,7 +33,7 @@ func (t *Tunnel) StartTunnel(nodeID string, tunnelServerAddress string, token st
 			"default": {
 				Protocol:   Protocol,
 				Addr:       t.NodeRPCURL.Host,
-				RemoteAddr: "0.0.0.0:AUTO",
+				RemoteAddr: RemoteAddr,
 			},
 		},
 		Logger:    log.NewEntry(log.New()),
