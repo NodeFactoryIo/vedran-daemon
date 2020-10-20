@@ -1,5 +1,18 @@
 # Changelog
 
+## [v0.2.0](https://github.com/NodeFactoryIo/vedran-daemon/tree/v0.2.0)
+
+[Full Changelog](https://github.com/NodeFactoryIo/vedran-daemon/compare/v0.1.2...v0.2.0)
+
+### Fixed
+
+### Added
+- Added banner on starting vedran-daemon [\#32](https://github.com/NodeFactoryIo/vedran-daemon/pull/32) ([mpetrun5](https://github.com/mpetrun5))
+- Added integration with load balancer http tunnel [\#39](https://github.com/NodeFactoryIo/vedran-daemon/pull/39) ([mpetrun5](https://github.com/mpetrun5))
+
+### Changed
+- Remove sentry [\#35](https://github.com/NodeFactoryIo/vedran-daemon/pull/35) ([mpetrun5](https://github.com/mpetrun5))
+
 ## [v0.1.2](https://github.com/NodeFactoryIo/vedran-daemon/tree/v0.1.2)
 
 [Full Changelog](https://github.com/NodeFactoryIo/vedran-daemon/compare/v0.1.1...v0.1.2)
