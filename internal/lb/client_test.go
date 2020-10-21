@@ -72,7 +72,6 @@ func TestClient_Register(t *testing.T) {
 	}
 	type args struct {
 		id            string
-		nodeURL       string
 		payoutAddress string
 		configHash    string
 	}
@@ -86,7 +85,7 @@ func TestClient_Register(t *testing.T) {
 	}{
 		{
 			name:    "Returns error if client does not return 200",
-			args:    args{"test-id", "http://localhost:3000", "0xtestaddress", "config-hash"},
+			args:    args{"test-id", "0xtestaddress", "config-hash"},
 			fields:  fields{http.DefaultClient, "valid", ""},
 			wantErr: true,
 			want:    "",
@@ -95,12 +94,12 @@ func TestClient_Register(t *testing.T) {
 			}},
 		{
 			name:    "Sets token on client if request valid",
-			args:    args{"test-id", "http://localhost:3000", "0xtestaddress", "config-hash"},
+			args:    args{"test-id", "0xtestaddress", "config-hash"},
 			fields:  fields{http.DefaultClient, "valid", ""},
 			wantErr: false,
 			want:    "test-token",
 			handleFunc: func(w http.ResponseWriter, r *http.Request) {
-				_, _ = io.WriteString(w, `{"token": "test-token"}`)
+				_, _ = io.WriteString(w, `{"token": "test-token", "tunnel_url": "192.168.1.31:5223"}`)
 			}},
 	}
 	for _, tt := range tests {
@@ -120,16 +119,15 @@ func TestClient_Register(t *testing.T) {
 			}
 			mux.HandleFunc("/api/v1/nodes", tt.handleFunc)
 
-			err := c.Register(tt.args.id, tt.args.nodeURL, tt.args.payoutAddress, tt.args.configHash)
+			registerResponse, err := c.Register(tt.args.id, tt.args.payoutAddress, tt.args.configHash)
 
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Client.Register() error = %v, wantErr %v", err, tt.wantErr)
 			}
 
-			if tt.want != c.Token {
+			if tt.want != c.Token || tt.want != registerResponse.Token {
 				t.Errorf("Client.Register() token = %s, want %s", c.Token, tt.want)
 			}
-
 		})
 
 		teardown()

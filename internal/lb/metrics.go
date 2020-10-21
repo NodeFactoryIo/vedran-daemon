@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/NodeFactoryIo/vedran-daemon/internal/node"
-	"github.com/getsentry/sentry-go"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -25,7 +24,6 @@ func (ms *metricsService) Send(client node.Client) (*http.Response, error) {
 	metrics, err := client.GetMetrics()
 	if err != nil {
 		log.Errorf("Failed sending metrics to load balancer because of: %v", err)
-		sentry.CaptureException(err)
 		return nil, err
 	}
 
@@ -35,7 +33,6 @@ func (ms *metricsService) Send(client node.Client) (*http.Response, error) {
 
 	if err != nil {
 		log.Errorf("Failed sending metrics to load balancer because of: %v", err)
-		sentry.CaptureException(err)
 		return nil, err
 	}
 

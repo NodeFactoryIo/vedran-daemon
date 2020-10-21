@@ -18,13 +18,13 @@ const (
 type RegisterRequest struct {
 	ID            string `json:"id"`
 	ConfigHash    string `json:"config_hash"`
-	NodeURL       string `json:"node_url"`
 	PayoutAddress string `json:"payout_address"`
 }
 
-// TokenResponse from lb register endpoint
-type TokenResponse struct {
-	Token string `json:"token"`
+// RegisterResponse from lb register endpoint
+type RegisterResponse struct {
+	Token               string `json:"token"`
+	TunnelServerAddress string `json:"tunnel_server_address"`
 }
 
 // Client used to communicate with vedran load balancer
@@ -49,22 +49,21 @@ func NewClient(baseURL *url.URL) *Client {
 }
 
 // Register daemon with load balancer and store token in client
-func (c *Client) Register(id string, nodeURL string, payoutAddress string, configHash string) error {
+func (c *Client) Register(id string, payoutAddress string, configHash string) (*RegisterResponse, error) {
 	body := &RegisterRequest{
 		ID:            id,
-		NodeURL:       nodeURL,
 		PayoutAddress: payoutAddress,
 		ConfigHash:    configHash,
 	}
 	req, _ := c.newRequest(http.MethodPost, registerEndpoint, body)
-	tokenResponse := new(TokenResponse)
-	_, err := c.do(req, tokenResponse)
+	registerResponse := new(RegisterResponse)
+	_, err := c.do(req, registerResponse)
 
-	if tokenResponse.Token != "" {
-		c.Token = tokenResponse.Token
+	if registerResponse.Token != "" {
+		c.Token = registerResponse.Token
 	}
 
-	return err
+	return registerResponse, err
 }
 
 // newRequest creates an API request. A relative URL should be provided in urlStr, which will be resolved to the

@@ -9,6 +9,7 @@ import (
 	"github.com/NodeFactoryIo/vedran-daemon/internal/node"
 	"github.com/NodeFactoryIo/vedran-daemon/internal/run"
 	"github.com/NodeFactoryIo/vedran-daemon/internal/telemetry"
+	"github.com/NodeFactoryIo/vedran-daemon/internal/tunnel"
 	"github.com/NodeFactoryIo/vedran-daemon/pkg/logger"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -85,8 +86,11 @@ func start(cmd *cobra.Command, _ []string) error {
 	lbClient := lb.NewClient(lbURL)
 	nodeClient := node.NewClient(rpcURL, metricsURL)
 	telemetry := telemetry.NewTelemetry()
+	tunnel := &tunnel.Tunnel{
+		NodeRPCURL: rpcURL,
+	}
 
-	err := run.Start(lbClient, nodeClient, telemetry, id, payoutAddress)
+	err := run.Start(tunnel, lbClient, nodeClient, telemetry, id, payoutAddress)
 	if err != nil {
 		return fmt.Errorf("Failed starting vedran daemon because: %v", err)
 	}
@@ -94,6 +98,7 @@ func start(cmd *cobra.Command, _ []string) error {
 	return nil
 }
 
+// Execute runs command
 func Execute() {
 	if err := startCmd.Execute(); err != nil {
 		fmt.Println(err)
