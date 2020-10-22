@@ -61,8 +61,10 @@ node and load balancer on registration which communicate via daemon used as a pr
 
 ### Required flags
 
-`--id` - id string by which load balancer will distinguish between nodes
+`--id` - id string by which load balancer will distinguish between nodes - **CAUTION** this should be a unique string and should not be shared
+
 `--lb` - public url of vedran load balancer
+
 `--payout-address` - address of wallet to which reward tokens should be set - **CAUTION** - use valid address depending on network
 
 ### Other flags
