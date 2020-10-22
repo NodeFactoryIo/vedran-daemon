@@ -36,6 +36,7 @@ Flags:
 ## Starting daemon
 
 First download latest prebuilt binary of vedran daemon [from releases](https://github.com/NodeFactoryIo/vedran-daemon/releases) and binary for [node](https://github.com/paritytech/polkadot/releases).
+Daemon is expected to be started in conjuction with node and will wait for node if it is unavailable.
 
 
 ### Node
