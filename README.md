@@ -43,6 +43,7 @@ For starting node see [instructions](https://github.com/paritytech/polkadot/blob
 
 **NOTE node should be started with rpc cors disabled
 
+Example:
 `
   ./polkadot --rpc-cors=all
 `
