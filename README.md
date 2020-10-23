@@ -17,7 +17,7 @@ Note that if you need to do this, you probably want to add your Go bin directory
 ## Usage
 
 ```
-$ vedran-daemon -h
+$ ./vedran-daemon -h
 Register vedran-daemon with load balancer and start sending telemetry
 
 Usage:
@@ -54,7 +54,7 @@ Daemon is started by invoking binary.
 
 For example:
 ```
-  vedran-daemon-linux-amd64 --id UuPrCMnkni --lb https://load-balancer.com --payout-address 15MCkjt3B59dNo5reMCWWpxY8QB8VpEbYLo2xHEjuuWsSmTU
+  ./vedran-daemon-linux-amd64 --id UuPrCMnkni --lb https://load-balancer.com --payout-address 15MCkjt3B59dNo5reMCWWpxY8QB8VpEbYLo2xHEjuuWsSmTU
 ```
 
 It will register to load balancer and start sending pings and metrics to load balancer.
