@@ -19,6 +19,7 @@ var (
 	logLevel       string
 	logFile        string
 	nodeRPCURL     string
+	nodeWSURL      string
 	nodeMetricsURL string
 	id             string
 	lbBaseURL      string
@@ -26,6 +27,7 @@ var (
 	lbURL          *url.URL
 	metricsURL     *url.URL
 	rpcURL         *url.URL
+	wsURL          *url.URL
 )
 
 var startCmd = &cobra.Command{
@@ -62,12 +64,18 @@ var startCmd = &cobra.Command{
 			return fmt.Errorf("Failed parsing rpc url: %v", err)
 		}
 
+		wsURL, err = url.Parse(nodeWSURL)
+		if err != nil {
+			return fmt.Errorf("Failed parsing ws url: %v", err)
+		}
+
 		return nil
 	},
 }
 
 func init() {
 	startCmd.Flags().StringVar(&nodeRPCURL, "node-rpc", "http://localhost:9933", "Polkadot node rpc url")
+	startCmd.Flags().StringVar(&nodeWSURL, "node-ws", "http://localhost:9944", "Polkadot node websocket url")
 	startCmd.Flags().StringVar(&nodeMetricsURL, "node-metrics", "http://localhost:9615", "Polkadot node metrics url")
 	startCmd.Flags().StringVar(&id, "id", "", "Vedran-daemon id string (required)")
 	startCmd.Flags().StringVar(&lbBaseURL, "lb", "", "Target load balancer url (required)")
@@ -88,6 +96,7 @@ func start(cmd *cobra.Command, _ []string) error {
 	telemetry := telemetry.NewTelemetry()
 	tunnel := &tunnel.Tunnel{
 		NodeRPCURL: rpcURL,
+		NodeWSURL:  wsURL,
 	}
 
 	err := run.Start(tunnel, lbClient, nodeClient, telemetry, id, payoutAddress)
