@@ -31,6 +31,7 @@ Flags:
       --log-level string        Level of logging (eg. debug, info, warn, error) (default "info")
       --node-metrics string     Polkadot node metrics url (default "localhost:9615")
       --node-rpc string         Polkadot node rpc url (default "localhost:9933")
+      --node-ws string         Polkadot node ws url (default "localhost:9944")
       --payout-address string   Payout address to which reward tokens will be sent (required)
 ```
 ## Starting daemon
@@ -78,6 +79,8 @@ node and load balancer on registration which communicate via daemon used as a pr
 `--node-metrics` - local url to node metrics - **DEFAULT** [http://localhost:9615]
 
 `--node-rpc` - local url to node rpc endpoint - **DEFAULT** [http://localhost:9933]
+
+`--node-ws` - local url to node websocket rpc endpoint - **DEFAULT** [http://localhost:9944]
 
 ## Development
 
