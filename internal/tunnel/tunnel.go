@@ -20,6 +20,7 @@ const (
 // Tunnel is tunnel connection with load balancer
 type Tunnel struct {
 	NodeRPCURL *url.URL
+	NodeWSURL  *url.URL
 }
 
 // Tunneler defines methods for connecting to load balancer tunnel
@@ -35,9 +36,14 @@ func (t *Tunnel) StartTunnel(nodeID string, tunnelServerAddress string, token st
 	c, err := client.NewClient(&client.ClientConfig{
 		ServerAddress: tunnelServerAddress,
 		Tunnels: map[string]*client.Tunnel{
-			"default": {
+			"http": {
 				Protocol:   Protocol,
 				Addr:       t.NodeRPCURL.Host,
+				RemoteAddr: RemoteAddr,
+			},
+			"ws": {
+				Protocol:   Protocol,
+				Addr:       t.NodeWSURL.Host,
 				RemoteAddr: RemoteAddr,
 			},
 		},
