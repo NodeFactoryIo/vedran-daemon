@@ -2,7 +2,11 @@
 
 ## [unreleased](https://github.com/NodeFactoryIo/vedran-daemon/tree/HEAD)
 
-[Full Changelog](https://github.com/NodeFactoryIo/vedran-daemon/compare/v0.2.0...HEAD)
+[Full Changelog](https://github.com/NodeFactoryIo/vedran-daemon/compare/v0.3.0...HEAD)
+
+## [v0.3.0](https://github.com/NodeFactoryIo/vedran-daemon/tree/v0.3.0)
+
+[Full Changelog](https://github.com/NodeFactoryIo/vedran-daemon/compare/v0.2.0...v0.3.0)
 
 ### Fixed
 
