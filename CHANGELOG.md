@@ -1,5 +1,21 @@
 # Changelog
 
+## [unreleased](https://github.com/NodeFactoryIo/vedran-daemon/tree/HEAD)
+
+[Full Changelog](https://github.com/NodeFactoryIo/vedran-daemon/compare/v0.3.0...HEAD)
+
+## [v0.3.0](https://github.com/NodeFactoryIo/vedran-daemon/tree/v0.3.0)
+
+[Full Changelog](https://github.com/NodeFactoryIo/vedran-daemon/compare/v0.2.0...v0.3.0)
+
+### Fixed
+
+### Added
+- Added websocket support [\#49](https://github.com/NodeFactoryIo/vedran-daemon/pull/49) ([mpetrun5](https://github.com/mpetrun5))
+
+### Changed
+
+
 ## [v0.2.0](https://github.com/NodeFactoryIo/vedran-daemon/tree/v0.2.0)
 
 [Full Changelog](https://github.com/NodeFactoryIo/vedran-daemon/compare/v0.1.2...v0.2.0)
