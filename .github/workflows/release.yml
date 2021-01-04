@@ -63,7 +63,7 @@ jobs:
           verify: "true"
           keystore: ${{ secrets.WINDOWS_CODESIGN_CERT }}
           password: ${{ secrets.WINDOWS_CODESIGN_PASS }}
-          appName: 'Vedran daemon'
+          appName: 'Vedran Daemon'
           domain: 'nodefactory.io'
 
       - name: Create Release
