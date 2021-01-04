@@ -38,9 +38,9 @@ arch = $(word 2, $(temp))
 
 $(PLATFORMS):
 	@if [ "$(os)" = "windows" ]; then \
-			GOOS=$(os) GOARCH=$(arch) go build ${version_flag} -o 'build/windows/vedran-daemon.exe'; \
+			GOOS=$(os) GOARCH=$(arch) go build -o 'build/windows/vedran-daemon.exe'; \
 	else \
-			GOOS=$(os) GOARCH=$(arch) go build ${version_flag} -o 'build/${os}-${arch}/vedran-daemon'; \
+			GOOS=$(os) GOARCH=$(arch) go build -o 'build/${os}-${arch}/vedran-daemon'; \
 	fi
 
 buildAll: $(PLATFORMS)
