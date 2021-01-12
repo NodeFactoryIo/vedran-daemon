@@ -49,13 +49,22 @@ jobs:
         shell: bash
         run: |
           make buildAll
-
       - name: Get Changelog Entry
         id: changelog_reader
         uses: mindsers/changelog-reader-action@v2
         with:
           version: ${{ needs.tag.outputs.tag }}
           path: ./CHANGELOG.md
+
+      - name: Sign Windows Binary
+        uses: nodefactoryio/windows-codesign-action@master
+        with:
+          binaryPath: "build/windows/vedran-daemon.exe"
+          verify: "true"
+          keystore: ${{ secrets.WINDOWS_CODESIGN_CERT }}
+          password: ${{ secrets.WINDOWS_CODESIGN_PASS }}
+          appName: 'Vedran Daemon'
+          domain: 'nodefactory.io'
 
       - name: Create Release
         id: create_release
@@ -68,6 +77,30 @@ jobs:
           prerelease: true
           release_name: Release ${{ needs.tag.outputs.tag }}
 
+      - name: Archive Linux 64
+        uses: thedoctor0/zip-release@master
+        with:
+          filename: 'vedran-daemon-linux-amd64.zip'
+          directory: 'build/linux-amd64/'
+
+      - name: Archive Linux Arm
+        uses: thedoctor0/zip-release@master
+        with:
+          filename: 'vedran-daemon-linux-arm.zip'
+          directory: 'build/linux-arm/'
+
+      - name: Archive Darwin 64
+        uses: thedoctor0/zip-release@master
+        with:
+          filename: 'vedran-daemon-darwin-amd64.zip'
+          directory: 'build/darwin-amd64/'
+
+      - name: Archive Windows
+        uses: thedoctor0/zip-release@master
+        with:
+          filename: 'vedran-daemon-windows.zip'
+          directory: 'build/windows/'
+
       - name: Upload Linux amd64
         id: vedran-daemon-linux-amd64
         uses: actions/upload-release-asset@v1
@@ -75,9 +108,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./vedran-daemon-linux-amd64
-          asset_name: vedran-daemon-linux-amd64
-          asset_content_type: application/x-binary
+          asset_path: ./build/linux-amd64/vedran-daemon-linux-amd64.zip
+          asset_name: vedran-daemon-linux-amd64.zip
+          asset_content_type: application/zip
 
       - name: Upload Linux Arm
         id: vedran-daemon-linux-arm
@@ -86,9 +119,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./vedran-daemon-linux-arm
-          asset_name: vedran-daemon-linux-arm
-          asset_content_type: application/x-binary
+          asset_path: ./build/linux-arm/vedran-daemon-linux-arm.zip
+          asset_name: vedran-daemon-linux-arm.zip
+          asset_content_type: application/zip
 
       - name: Upload Windows
         id: vedran-daemon-windows
@@ -97,9 +130,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./vedran-daemon-windows-amd64.exe
-          asset_name: vedran-daemon-windows.exe
-          asset_content_type: application/x-binary
+          asset_path: ./build/windows/vedran-daemon-windows.zip
+          asset_name: vedran-daemon-windows.zip
+          asset_content_type: application/zip
 
       - name: Upload MacOS
         id: vedran-daemon-macos
@@ -108,9 +141,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./vedran-daemon-darwin-amd64
-          asset_name: vedran-daemon-macos
-          asset_content_type: application/x-binary
+          asset_path: ./build/darwin-amd64/vedran-daemon-darwin-amd64.zip
+          asset_name: vedran-daemon-macos.zip
+          asset_content_type: application/zip
 
       #in case of failure
       - name: Rollback on failure

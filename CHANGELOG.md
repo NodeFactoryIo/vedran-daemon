@@ -4,6 +4,13 @@
 
 [Full Changelog](https://github.com/NodeFactoryIo/vedran-daemon/compare/v0.3.0...HEAD)
 
+### Fixed
+- Fix displaying configuration [\#53](https://github.com/NodeFactoryIo/vedran-daemon/pull/53) ([MakMuftic](https://github.com/MakMuftic))
+
+### Added
+
+### Changed
+
 ## [v0.3.0](https://github.com/NodeFactoryIo/vedran-daemon/tree/v0.3.0)
 
 [Full Changelog](https://github.com/NodeFactoryIo/vedran-daemon/compare/v0.2.0...v0.3.0)
