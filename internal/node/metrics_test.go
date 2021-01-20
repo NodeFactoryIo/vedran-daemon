@@ -26,6 +26,7 @@ func TestGetMetrics(t *testing.T) {
 	peerCount := float64(19)
 	bestBlockHeight := float64(432933)
 	finalizedBlockHeight := float64(432640)
+	targetBlockHeight := float64(1547694)
 	readyTransactionCount := float64(0)
 	tests := []Test{
 		{
@@ -54,12 +55,13 @@ func TestGetMetrics(t *testing.T) {
 				_, _ = io.WriteString(w, `invalid`)
 			}},
 		{
-			name: "Returns metrics if prometheus response valid",
+			name: "Returns metrics if prometheus response valid, not synced",
 			args: args{"valid"},
 			want: &Metrics{
 				PeerCount:             &peerCount,
 				BestBlockHeight:       &bestBlockHeight,
 				FinalizedBlockHeight:  &finalizedBlockHeight,
+				TargetBlockHeight:     &targetBlockHeight,
 				ReadyTransactionCount: &readyTransactionCount,
 			},
 			wantErr: false,
@@ -80,7 +82,37 @@ func TestGetMetrics(t *testing.T) {
 					# TYPE polkadot_ready_transactions_number gauge
 					polkadot_ready_transactions_number 0
 					`)
-			}},
+			},
+		},
+		{
+			name: "Returns metrics if prometheus response valid, synced",
+			args: args{"valid"},
+			want: &Metrics{
+				PeerCount:             &peerCount,
+				BestBlockHeight:       &bestBlockHeight,
+				FinalizedBlockHeight:  &finalizedBlockHeight,
+				TargetBlockHeight:     &bestBlockHeight,
+				ReadyTransactionCount: &readyTransactionCount,
+			},
+			wantErr: false,
+			handleFunc: func(w http.ResponseWriter, r *http.Request) {
+				assert.Equal(t, http.MethodGet, r.Method)
+				_, _ = io.WriteString(
+					w,
+					`
+					# HELP polkadot_sync_peers Number of peers we sync with
+					# TYPE polkadot_sync_peers gauge
+					polkadot_sync_peers 19
+					# HELP polkadot_block_height Block height info of the chain
+					# TYPE polkadot_block_height gauge
+					polkadot_block_height{status="best"} 432933
+					polkadot_block_height{status="finalized"} 432640
+					# HELP polkadot_ready_transactions_number Number of transactions in the ready queue
+					# TYPE polkadot_ready_transactions_number gauge
+					polkadot_ready_transactions_number 0
+					`)
+			},
+		},
 	}
 
 	for _, tt := range tests {
