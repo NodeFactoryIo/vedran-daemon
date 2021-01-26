@@ -1,14 +1,5 @@
 # Changelog
 
-## [v0.3.2](https://github.com/NodeFactoryIo/vedran-daemon/tree/v0.3.2)
-
-[Full Changelog](https://github.com/NodeFactoryIo/vedran-daemon/compare/v0.3.1...HEAD)
-
-### Fixed
-
-### Added
-- Add ws endpoint check on start [\#62](https://github.com/NodeFactoryIo/vedran-daemon/pull/62) ([MakMuftic](https://github.com/MakMuftic))
-
 ### Changed
 
 ## [v0.3.1](https://github.com/NodeFactoryIo/vedran-daemon/tree/v0.3.1)
