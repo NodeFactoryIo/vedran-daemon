@@ -2,9 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"net/url"
-	"os"
-
 	"github.com/NodeFactoryIo/vedran-daemon/internal/lb"
 	"github.com/NodeFactoryIo/vedran-daemon/internal/node"
 	"github.com/NodeFactoryIo/vedran-daemon/internal/run"
@@ -13,6 +10,8 @@ import (
 	"github.com/NodeFactoryIo/vedran-daemon/pkg/logger"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"net/url"
+	"os"
 )
 
 var (
@@ -75,7 +74,7 @@ var startCmd = &cobra.Command{
 
 func init() {
 	startCmd.Flags().StringVar(&nodeRPCURL, "node-rpc", "http://localhost:9933", "Polkadot node rpc url")
-	startCmd.Flags().StringVar(&nodeWSURL, "node-ws", "http://localhost:9944", "Polkadot node websocket url")
+	startCmd.Flags().StringVar(&nodeWSURL, "node-ws", "ws://localhost:9944", "Polkadot node websocket url")
 	startCmd.Flags().StringVar(&nodeMetricsURL, "node-metrics", "http://localhost:9615", "Polkadot node metrics url")
 	startCmd.Flags().StringVar(&id, "id", "", "Vedran-daemon id string (required)")
 	startCmd.Flags().StringVar(&lbBaseURL, "lb", "", "Target load balancer url (required)")
@@ -91,6 +90,11 @@ func init() {
 func start(cmd *cobra.Command, _ []string) error {
 	DisplayBanner()
 
+	err := checkIfWsAvailable(wsURL)
+	if err != nil {
+		return err
+	}
+
 	lbClient := lb.NewClient(lbURL)
 	nodeClient := node.NewClient(rpcURL, metricsURL)
 	telemetry := telemetry.NewTelemetry()
@@ -99,9 +103,9 @@ func start(cmd *cobra.Command, _ []string) error {
 		NodeWSURL:  wsURL,
 	}
 
-	err := run.Start(tunnel, lbClient, nodeClient, telemetry, id, payoutAddress)
+	err = run.Start(tunnel, lbClient, nodeClient, telemetry, id, payoutAddress)
 	if err != nil {
-		return fmt.Errorf("Failed starting vedran daemon because: %v", err)
+		return fmt.Errorf("Failed starting vedran daemon, because of %v", err)
 	}
 
 	return nil

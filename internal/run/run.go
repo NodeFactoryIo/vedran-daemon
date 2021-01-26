@@ -16,7 +16,14 @@ import (
 var sleep = time.Sleep
 
 // Start registers to load balancer and starts sending telemetry
-func Start(tunnel tunnel.Tunneler, lbClient *lb.Client, nodeClient node.Client, telemetry telemetry.Telemetry, id string, payoutAddress string) error {
+func Start(
+	tunnel tunnel.Tunneler,
+	lbClient *lb.Client,
+	nodeClient node.Client,
+	telemetry telemetry.Telemetry,
+	id string,
+	payoutAddress string,
+) error {
 	var configHash hash.Hash32
 	for {
 		var err error
@@ -29,7 +36,9 @@ func Start(tunnel tunnel.Tunneler, lbClient *lb.Client, nodeClient node.Client, 
 		sleep(time.Second * 5)
 	}
 
-	registerResponse, err := lbClient.Register(id, payoutAddress, base64.StdEncoding.EncodeToString(configHash.Sum(nil)[:]))
+	registerResponse, err := lbClient.Register(
+		id, payoutAddress, base64.StdEncoding.EncodeToString(configHash.Sum(nil)[:]),
+	)
 	if err != nil {
 		return err
 	}
