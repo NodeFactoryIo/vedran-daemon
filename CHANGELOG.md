@@ -1,5 +1,14 @@
 # Changelog
 
+## [v0.3.2](https://github.com/NodeFactoryIo/vedran-daemon/tree/v0.3.2)
+
+[Full Changelog](https://github.com/NodeFactoryIo/vedran-daemon/compare/v0.3.1...v0.3.2)
+
+### Fixed
+- Add target block to metrics [\#58](https://github.com/NodeFactoryIo/vedran-daemon/pull/58) ([MakMuftic](https://github.com/MakMuftic))
+
+### Added
+
 ### Changed
 
 ## [v0.3.1](https://github.com/NodeFactoryIo/vedran-daemon/tree/v0.3.1)
