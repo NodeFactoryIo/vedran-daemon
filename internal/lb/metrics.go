@@ -36,5 +36,6 @@ func (ms *metricsService) Send(client node.Client) (*http.Response, error) {
 		return nil, err
 	}
 
+	resp.Body.Close()
 	return resp, err
 }
