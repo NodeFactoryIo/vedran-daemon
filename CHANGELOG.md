@@ -1,5 +1,16 @@
 # Changelog
 
+## [v0.3.4](https://github.com/NodeFactoryIo/vedran-daemon/tree/v0.3.4)
+
+[Full Changelog](https://github.com/NodeFactoryIo/vedran-daemon/compare/v0.3.3...v0.3.4)
+
+### Fixed
+- Fix socket and request memory leaks [\#63](https://github.com/NodeFactoryIo/vedran-daemon/pull/63) ([mpetrun5](https://github.com/mpetrun5))
+
+### Added
+
+### Changed
+
 ## [v0.3.3](https://github.com/NodeFactoryIo/vedran-daemon/tree/v0.3.3)
 
 [Full Changelog](https://github.com/NodeFactoryIo/vedran-daemon/compare/v0.3.2...v0.3.3)
