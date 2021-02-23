@@ -38,5 +38,6 @@ func (ps *pingService) Send() (*http.Response, error) {
 		return nil, err
 	}
 
+	resp.Body.Close()
 	return resp, err
 }

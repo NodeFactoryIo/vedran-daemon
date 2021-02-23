@@ -104,9 +104,9 @@ func (c *Client) do(req *http.Request, v interface{}) (*http.Response, error) {
 	} else if resp.StatusCode != 200 {
 		return nil, fmt.Errorf("Request %v returned invalid status code %d", req, resp.StatusCode)
 	}
+	defer resp.Body.Close()
 
 	if v != nil {
-		defer resp.Body.Close()
 		body, _ := ioutil.ReadAll((resp.Body))
 		err = json.Unmarshal(body, &v)
 		if err != nil {
