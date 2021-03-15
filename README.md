@@ -39,7 +39,6 @@ Flags:
 First download latest prebuilt binary of vedran daemon [from releases](https://github.com/NodeFactoryIo/vedran-daemon/releases) and binary for [node](https://github.com/paritytech/polkadot/releases).
 Daemon is expected to be started in conjuction with node and will wait for node if it is unavailable.
 
-
 ### Node
 For starting node see [instructions](https://github.com/paritytech/polkadot/blob/master/README.md)
 
@@ -82,6 +81,34 @@ node and load balancer on registration which communicate via daemon used as a pr
 
 `--node-ws` - local url to node websocket rpc endpoint - **DEFAULT** [http://localhost:9944]
 
+### Docker
+
+**NOTE: Unstable due to [issue](https://github.com/docker/for-linux/issues/335) and should not be used in production
+
+#### Network
+
+For daemon and node to be able communicate with each other first a docker network should be created with:
+
+```
+docker network create polkadot
+```
+
+#### Node
+
+```
+docker run -d --restart unless-stopped \
+        -v $HOME/polkadot/data:/data parity/polkadot:latest \
+        --name "Test node" \
+        --rpc-cors=all --rpc-external --ws-external
+```
+
+#### Daemon
+
+```
+docker run --network polkadot -d --restart unless-stopped nodefactory/vedran-daemon:latest
+        --id unique-UuPrCMnkni --lb https://westend.vedran.nodefactory.io \
+        --payout-address 15MCkjt3B59dNo5reMCWWpxY8QB8VpEbYLo2xHEjuuWsSmTU
+```
 ## Development
 
 
